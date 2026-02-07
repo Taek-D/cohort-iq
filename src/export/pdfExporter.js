@@ -25,14 +25,15 @@ export async function exportToPDF(
   // 모든 요소에 computed style(rgb)을 인라인 복사
   inlineComputedStyles(sourceElement);
 
-  // 메인 페이지 스타일시트 일시 비활성화 (oklch 파싱 오류 방지)
-  const sheets = Array.from(document.styleSheets);
-  sheets.forEach((ss) => {
-    ss.disabled = true;
+  // 스타일시트 DOM 요소를 완전 제거 (html2canvas 클론 시 복사 방지)
+  const removedEls = [];
+  document.querySelectorAll('link[rel="stylesheet"], style').forEach((el) => {
+    removedEls.push({ el, parent: el.parentNode, next: el.nextSibling });
+    el.remove();
   });
 
   try {
-    // html2canvas 실행 (스타일시트 비활성 → oklch 파싱 없음)
+    // html2canvas 실행 (문서에 스타일시트 요소 없음 → oklch 파싱 불가)
     const canvas = await html2canvas(sourceElement, {
       scale: 2,
       useCORS: true,
@@ -76,9 +77,9 @@ export async function exportToPDF(
     // Blob 반환
     return pdf.output('blob');
   } finally {
-    // 스타일시트 복원
-    sheets.forEach((ss) => {
-      ss.disabled = false;
+    // 스타일시트 DOM 요소 복원
+    removedEls.forEach(({ el, parent, next }) => {
+      parent.insertBefore(el, next);
     });
     // 임시 컨테이너 제거
     document.body.removeChild(container);
