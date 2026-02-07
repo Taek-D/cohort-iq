@@ -200,11 +200,45 @@ function inlineComputedStyles(el) {
   });
 }
 
+// oklch 색상을 rgb hex로 변환 (canvas 2d context 활용)
+const colorCtx = (() => {
+  const c = document.createElement('canvas');
+  c.width = 1;
+  c.height = 1;
+  return c.getContext('2d');
+})();
+
+function resolveColor(value) {
+  if (!value || !value.includes('oklch')) return value;
+  // oklch()를 포함하는 값을 canvas fillStyle로 강제 변환
+  colorCtx.fillStyle = '#000000';
+  colorCtx.fillStyle = value;
+  return colorCtx.fillStyle;
+}
+
+const COLOR_PROPS = new Set([
+  'color',
+  'background-color',
+  'border-color',
+  'border-top-color',
+  'border-right-color',
+  'border-bottom-color',
+  'border-left-color',
+  'outline-color',
+  'box-shadow',
+  'background-image',
+  'background',
+]);
+
 function inlineProps(el, props) {
   const computed = window.getComputedStyle(el);
   props.forEach((prop) => {
-    const value = computed.getPropertyValue(prop);
+    let value = computed.getPropertyValue(prop);
     if (value) {
+      // 색상 관련 속성은 oklch → rgb 강제 변환
+      if (COLOR_PROPS.has(prop) || value.includes('oklch')) {
+        value = resolveColor(value);
+      }
       el.style.setProperty(prop, value);
     }
   });
