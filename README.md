@@ -2,7 +2,7 @@
 
 **3초 만에 구독 비즈니스의 건강을 진단하는 코호트 분석 도구**
 
-CSV 파일 업로드만으로 코호트 리텐션을 분석하고, RFM 기반 알고리즘으로 이탈 위험 사용자를 식별하여 1-Page Executive Summary PDF를 자동 생성합니다.
+CSV 파일 업로드만으로 코호트 리텐션을 분석하고, 활동 패턴 기반 스코어링으로 이탈 위험 사용자를 식별하여 1-Page Executive Summary PDF를 자동 생성합니다.
 
 [![Live Demo](https://img.shields.io/badge/demo-cohort--iq.vercel.app-blue)](https://cohort-iq.vercel.app)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
@@ -26,7 +26,7 @@ CSV 파일 업로드만으로 코호트 리텐션을 분석하고, RFM 기반 �
 <img src="docs/screenshot-heatmap.png" alt="코호트 리텐션 히트맵" width="720">
 
 ### 2. Churn 위험 예측
-- RFM(Recency, Frequency, Monetary) 기반 위험 스코어링 (0-100)
+- 활동 패턴(Recency, Frequency, Consistency) 기반 위험 스코어링 (0-100)
 - CRITICAL / HIGH / MEDIUM / LOW 4단계 세그먼트 분류
 - 실행 가능한 인사이트 및 추천 조치 자동 생성
 
@@ -110,7 +110,7 @@ cohort-iq/
 │   ├── core/
 │   │   ├── dataValidator.js      # CSV 검증 + 컬럼 자동 매칭
 │   │   ├── cohortAnalysis.js     # 코호트 그룹화 + 리텐션 계산
-│   │   ├── churnAnalysis.js      # RFM 위험 스코어링
+│   │   ├── churnAnalysis.js      # 활동 패턴 기반 위험 스코어링
 │   │   ├── analysisWorker.js     # Web Worker (분석 오프로딩)
 │   │   └── *.test.js             # 단위 테스트 (14개)
 │   ├── visualization/
