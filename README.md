@@ -10,6 +10,10 @@ CSV 파일 업로드만으로 코호트 리텐션을 분석하고, RFM 기반 �
 
 > **[Live Demo](https://cohort-iq.vercel.app)** - 샘플 데이터로 즉시 체험해보세요
 
+<p align="center">
+  <img src="docs/demo.gif" alt="CohortIQ Demo" width="720">
+</p>
+
 ---
 
 ## 주요 기능
@@ -19,15 +23,21 @@ CSV 파일 업로드만으로 코호트 리텐션을 분석하고, RFM 기반 �
 - 리텐션 히트맵 + 트렌드 라인 차트 시각화
 - 처리 속도: 10,000행 기준 3초 이내
 
+<img src="docs/screenshot-heatmap.png" alt="코호트 리텐션 히트맵" width="720">
+
 ### 2. Churn 위험 예측
 - RFM(Recency, Frequency, Monetary) 기반 위험 스코어링 (0-100)
 - CRITICAL / HIGH / MEDIUM / LOW 4단계 세그먼트 분류
 - 실행 가능한 인사이트 및 추천 조치 자동 생성
 
+<img src="docs/screenshot-churn.png" alt="Churn 위험 분석" width="720">
+
 ### 3. Executive Summary PDF
 - 건강도 점수 (A/B/C/D 등급)
 - 리텐션 추이 + Churn 위험 요약
 - 1-Page PDF 다운로드
+
+<img src="docs/screenshot-summary.png" alt="Executive Summary" width="720">
 
 ---
 
