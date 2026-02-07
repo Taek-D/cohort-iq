@@ -319,12 +319,12 @@ function handleAnalysisSuccess(cohortResult, churnResult) {
     destroyCharts(); // 이전 차트 제거
 
     // 히트맵
-    const heatmapCtx = document.getElementById('heatmapChart').getContext('2d');
-    charts.heatmap = renderRetentionHeatmap(heatmapCtx, cohortResult.heatmapData);
+    const heatmapCanvas = document.getElementById('heatmapChart');
+    charts.heatmap = renderRetentionHeatmap(heatmapCanvas, cohortResult.heatmapData);
 
     // 트렌드
-    const trendCtx = document.getElementById('trendChart').getContext('2d');
-    charts.trend = renderRetentionTrend(trendCtx, cohortResult.retentionMatrix);
+    const trendCanvas = document.getElementById('trendChart');
+    charts.trend = renderRetentionTrend(trendCanvas, cohortResult.retentionMatrix);
 
     // Churn 차트
     const riskCanvas = document.getElementById('riskChart');
