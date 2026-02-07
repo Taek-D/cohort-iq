@@ -14,39 +14,26 @@ export async function exportToPDF(
   const { default: jsPDF } = await import('jspdf');
   const { default: html2canvas } = await import('html2canvas');
 
-  // 1. 메인 페이지에서 Tailwind computed style 계산용 임시 컨테이너
+  // 임시 컨테이너 생성
   const container = document.createElement('div');
   container.innerHTML = htmlContent;
   container.style.cssText = 'position:absolute;left:-9999px;top:0';
   document.body.appendChild(container);
+
   const sourceElement = container.firstElementChild;
 
-  // 2. oklch 없는 격리된 iframe 생성
-  const iframe = document.createElement('iframe');
-  iframe.style.cssText =
-    'position:absolute;left:-9999px;top:0;width:800px;height:2000px;border:none';
-  document.body.appendChild(iframe);
+  // 모든 요소에 computed style(rgb)을 인라인 복사
+  inlineComputedStyles(sourceElement);
 
-  const iframeDoc = iframe.contentDocument;
-  iframeDoc.open();
-  iframeDoc.write(
-    '<!DOCTYPE html><html><head></head><body style="margin:0;padding:0;background:#fff">' +
-      htmlContent +
-      '</body></html>'
-  );
-  iframeDoc.close();
-
-  const targetElement = iframeDoc.body.firstElementChild;
-
-  // 3. 메인 페이지의 computed style(rgb)을 iframe 요소에 인라인 복사
-  inlineComputedStyles(sourceElement, targetElement);
-
-  // 소스 컨테이너 제거 (더 이상 불필요)
-  document.body.removeChild(container);
+  // 메인 페이지 스타일시트 일시 비활성화 (oklch 파싱 오류 방지)
+  const sheets = Array.from(document.styleSheets);
+  sheets.forEach((ss) => {
+    ss.disabled = true;
+  });
 
   try {
-    // 4. iframe 내부에서 html2canvas 실행 (oklch 스타일시트 없음)
-    const canvas = await html2canvas(targetElement, {
+    // html2canvas 실행 (스타일시트 비활성 → oklch 파싱 없음)
+    const canvas = await html2canvas(sourceElement, {
       scale: 2,
       useCORS: true,
       logging: false,
@@ -89,8 +76,12 @@ export async function exportToPDF(
     // Blob 반환
     return pdf.output('blob');
   } finally {
-    // iframe 제거
-    document.body.removeChild(iframe);
+    // 스타일시트 복원
+    sheets.forEach((ss) => {
+      ss.disabled = false;
+    });
+    // 임시 컨테이너 제거
+    document.body.removeChild(container);
   }
 }
 
@@ -163,7 +154,7 @@ export function showPDFPreview(htmlContent) {
  * 원본 요소의 computed style을 클론 요소에 인라인으로 복사
  * getComputedStyle은 색상을 rgb()로 반환하므로 oklch 문제 우회
  */
-function inlineComputedStyles(originalEl, clonedEl) {
+function inlineComputedStyles(el) {
   const styleProps = [
     'color',
     'background-color',
@@ -201,24 +192,19 @@ function inlineComputedStyles(originalEl, clonedEl) {
     'opacity',
   ];
 
-  copyProps(originalEl, clonedEl, styleProps);
-
-  const origChildren = originalEl.querySelectorAll('*');
-  const clonedChildren = clonedEl.querySelectorAll('*');
-
-  origChildren.forEach((orig, i) => {
-    if (clonedChildren[i]) {
-      copyProps(orig, clonedChildren[i], styleProps);
-    }
+  // 루트 요소와 모든 자식에 computed style 인라인
+  inlineProps(el, styleProps);
+  el.querySelectorAll('*').forEach((child) => {
+    inlineProps(child, styleProps);
   });
 }
 
-function copyProps(from, to, props) {
-  const computed = window.getComputedStyle(from);
+function inlineProps(el, props) {
+  const computed = window.getComputedStyle(el);
   props.forEach((prop) => {
     const value = computed.getPropertyValue(prop);
     if (value) {
-      to.style.setProperty(prop, value);
+      el.style.setProperty(prop, value);
     }
   });
 }
