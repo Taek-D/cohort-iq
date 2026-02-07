@@ -19,6 +19,9 @@ export async function exportToPDF(htmlContent, filename = 'cohort-summary.pdf') 
     container.style.top = '0';
     document.body.appendChild(container);
 
+    // html2canvas가 oklch() 색상을 파싱하지 못하므로 rgb로 변환
+    convertOklchToRgb(container);
+
     try {
         // HTML → Canvas
         const canvas = await html2canvas(container.firstElementChild, {
@@ -132,4 +135,50 @@ export function showPDFPreview(htmlContent) {
             document.body.removeChild(modal);
         }
     });
+}
+
+/**
+ * oklch() 색상을 rgb()로 변환 (html2canvas 호환)
+ * 브라우저의 getComputedStyle로 resolved 색상을 얻어 inline style로 덮어씀
+ */
+function convertOklchToRgb(container) {
+    const colorProps = [
+        'color',
+        'backgroundColor',
+        'borderColor',
+        'borderTopColor',
+        'borderRightColor',
+        'borderBottomColor',
+        'borderLeftColor',
+    ];
+
+    const elements = container.querySelectorAll('*');
+    elements.forEach((el) => {
+        const computed = window.getComputedStyle(el);
+        colorProps.forEach((prop) => {
+            const value = computed[prop];
+            if (value && value.includes('oklch')) {
+                // 브라우저가 이미 resolved한 값을 캔버스로 추출하여 rgb로 변환
+                el.style[prop] = oklchToRgbFallback(value);
+            }
+        });
+    });
+}
+
+/**
+ * oklch 문자열을 rgb로 변환 (캔버스 2D 컨텍스트 활용)
+ */
+function oklchToRgbFallback(oklchValue) {
+    try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 1;
+        canvas.height = 1;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = oklchValue;
+        ctx.fillRect(0, 0, 1, 1);
+        const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data;
+        return a < 255 ? `rgba(${r}, ${g}, ${b}, ${(a / 255).toFixed(2)})` : `rgb(${r}, ${g}, ${b})`;
+    } catch {
+        return oklchValue;
+    }
 }
