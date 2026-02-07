@@ -14,33 +14,43 @@ export async function exportToPDF(
   const { default: jsPDF } = await import('jspdf');
   const { default: html2canvas } = await import('html2canvas');
 
-  // 임시 컨테이너 생성
+  // 1. 메인 페이지에서 Tailwind computed style 계산용 임시 컨테이너
   const container = document.createElement('div');
   container.innerHTML = htmlContent;
-  container.style.position = 'absolute';
-  container.style.left = '-9999px';
-  container.style.top = '0';
+  container.style.cssText = 'position:absolute;left:-9999px;top:0';
   document.body.appendChild(container);
-
   const sourceElement = container.firstElementChild;
 
+  // 2. oklch 없는 격리된 iframe 생성
+  const iframe = document.createElement('iframe');
+  iframe.style.cssText =
+    'position:absolute;left:-9999px;top:0;width:800px;height:2000px;border:none';
+  document.body.appendChild(iframe);
+
+  const iframeDoc = iframe.contentDocument;
+  iframeDoc.open();
+  iframeDoc.write(
+    '<!DOCTYPE html><html><head></head><body style="margin:0;padding:0;background:#fff">' +
+      htmlContent +
+      '</body></html>'
+  );
+  iframeDoc.close();
+
+  const targetElement = iframeDoc.body.firstElementChild;
+
+  // 3. 메인 페이지의 computed style(rgb)을 iframe 요소에 인라인 복사
+  inlineComputedStyles(sourceElement, targetElement);
+
+  // 소스 컨테이너 제거 (더 이상 불필요)
+  document.body.removeChild(container);
+
   try {
-    // HTML → Canvas (onclone으로 oklch 문제 해결)
-    const canvas = await html2canvas(sourceElement, {
+    // 4. iframe 내부에서 html2canvas 실행 (oklch 스타일시트 없음)
+    const canvas = await html2canvas(targetElement, {
       scale: 2,
       useCORS: true,
       logging: false,
       backgroundColor: '#ffffff',
-      onclone: (_clonedDoc, clonedElement) => {
-        // 1. 원본 computed style(rgb)을 클론 요소에 인라인
-        inlineComputedStyles(sourceElement, clonedElement);
-
-        // 2. 클론 문서에서 모든 스타일시트 제거 (oklch 파싱 오류 방지)
-        // computed style이 이미 인라인되었으므로 외부 CSS 불필요
-        _clonedDoc
-          .querySelectorAll('link[rel="stylesheet"], style')
-          .forEach((el) => el.remove());
-      },
     });
 
     // Canvas → Image
@@ -79,8 +89,8 @@ export async function exportToPDF(
     // Blob 반환
     return pdf.output('blob');
   } finally {
-    // 임시 컨테이너 제거
-    document.body.removeChild(container);
+    // iframe 제거
+    document.body.removeChild(iframe);
   }
 }
 
