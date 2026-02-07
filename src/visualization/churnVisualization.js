@@ -1,5 +1,5 @@
 // churnVisualization.js - Churn 위험 시각화
-import { Chart } from 'chart.js';
+import { Chart } from 'chart.js/auto';
 
 /**
  * 위험 세그먼트 파이 차트

@@ -1,5 +1,5 @@
 // heatmapRenderer.js - Chart.js 히트맵 시각화
-import { Chart } from 'chart.js';
+import { Chart } from 'chart.js/auto';
 import { MatrixController, MatrixElement } from 'chartjs-chart-matrix';
 
 // Chart.js에 Matrix 플러그인 등록
