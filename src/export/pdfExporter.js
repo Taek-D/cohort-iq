@@ -1,4 +1,4 @@
-// pdfExporter.js - PDF Export
+// pdfExporter.js - PDF Export (html2canvas-pro: oklch 지원)
 
 /**
  * HTML을 PDF로 변환
@@ -12,28 +12,20 @@ export async function exportToPDF(
 ) {
   // Dynamic import for code splitting
   const { default: jsPDF } = await import('jspdf');
-  const { default: html2canvas } = await import('html2canvas');
+  const { default: html2canvas } = await import('html2canvas-pro');
 
   // 임시 컨테이너 생성
   const container = document.createElement('div');
   container.innerHTML = htmlContent;
-  container.style.cssText = 'position:absolute;left:-9999px;top:0';
+  container.style.position = 'absolute';
+  container.style.left = '-9999px';
+  container.style.top = '0';
   document.body.appendChild(container);
 
   const sourceElement = container.firstElementChild;
 
-  // 모든 요소에 computed style(rgb)을 인라인 복사
-  inlineComputedStyles(sourceElement);
-
-  // 스타일시트 DOM 요소를 완전 제거 (html2canvas 클론 시 복사 방지)
-  const removedEls = [];
-  document.querySelectorAll('link[rel="stylesheet"], style').forEach((el) => {
-    removedEls.push({ el, parent: el.parentNode, next: el.nextSibling });
-    el.remove();
-  });
-
   try {
-    // html2canvas 실행 (문서에 스타일시트 요소 없음 → oklch 파싱 불가)
+    // HTML → Canvas
     const canvas = await html2canvas(sourceElement, {
       scale: 2,
       useCORS: true,
@@ -77,10 +69,6 @@ export async function exportToPDF(
     // Blob 반환
     return pdf.output('blob');
   } finally {
-    // 스타일시트 DOM 요소 복원
-    removedEls.forEach(({ el, parent, next }) => {
-      parent.insertBefore(el, next);
-    });
     // 임시 컨테이너 제거
     document.body.removeChild(container);
   }
@@ -147,99 +135,6 @@ export function showPDFPreview(htmlContent) {
   modal.addEventListener('click', (e) => {
     if (e.target === modal) {
       document.body.removeChild(modal);
-    }
-  });
-}
-
-/**
- * 원본 요소의 computed style을 클론 요소에 인라인으로 복사
- * getComputedStyle은 색상을 rgb()로 반환하므로 oklch 문제 우회
- */
-function inlineComputedStyles(el) {
-  const styleProps = [
-    'color',
-    'background-color',
-    'background-image',
-    'background',
-    'border-color',
-    'border-top-color',
-    'border-right-color',
-    'border-bottom-color',
-    'border-left-color',
-    'border-width',
-    'border-style',
-    'border-radius',
-    'box-shadow',
-    'outline-color',
-    'font-size',
-    'font-weight',
-    'font-family',
-    'line-height',
-    'text-align',
-    'text-decoration',
-    'display',
-    'flex-direction',
-    'justify-content',
-    'align-items',
-    'gap',
-    'grid-template-columns',
-    'padding',
-    'margin',
-    'width',
-    'max-width',
-    'min-height',
-    'height',
-    'overflow',
-    'opacity',
-  ];
-
-  // 루트 요소와 모든 자식에 computed style 인라인
-  inlineProps(el, styleProps);
-  el.querySelectorAll('*').forEach((child) => {
-    inlineProps(child, styleProps);
-  });
-}
-
-// oklch 색상을 rgb hex로 변환 (canvas 2d context 활용)
-const colorCtx = (() => {
-  const c = document.createElement('canvas');
-  c.width = 1;
-  c.height = 1;
-  return c.getContext('2d');
-})();
-
-function resolveColor(value) {
-  if (!value || !value.includes('oklch')) return value;
-  // oklch()를 포함하는 값을 canvas fillStyle로 강제 변환
-  colorCtx.fillStyle = '#000000';
-  colorCtx.fillStyle = value;
-  return colorCtx.fillStyle;
-}
-
-const COLOR_PROPS = new Set([
-  'color',
-  'background-color',
-  'border-color',
-  'border-top-color',
-  'border-right-color',
-  'border-bottom-color',
-  'border-left-color',
-  'outline-color',
-  'box-shadow',
-  'background-image',
-  'background',
-]);
-
-function inlineProps(el, props) {
-  const computed = window.getComputedStyle(el);
-  props.forEach((prop) => {
-    let value = computed.getPropertyValue(prop);
-    if (value) {
-      // 색상 관련 속성은 oklch → rgb 강제 변환
-      if (COLOR_PROPS.has(prop) || value.includes('oklch')) {
-        value = resolveColor(value);
-      }
-      el.style.setProperty(prop, value);
     }
   });
 }

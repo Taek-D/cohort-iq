@@ -8,7 +8,7 @@ export default defineConfig({
             output: {
                 manualChunks: {
                     vendor: ['papaparse', 'chart.js', 'date-fns'],
-                    export: ['jspdf', 'html2canvas'],
+                    export: ['jspdf', 'html2canvas-pro'],
                 },
             },
         },
