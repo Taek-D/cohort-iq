@@ -35,13 +35,11 @@ export async function exportToPDF(
         // 1. 원본 computed style(rgb)을 클론 요소에 인라인
         inlineComputedStyles(sourceElement, clonedElement);
 
-        // 2. 클론 문서에서 oklch가 포함된 스타일시트 무력화
-        _clonedDoc.querySelectorAll('style').forEach((style) => {
-          style.textContent = style.textContent.replace(
-            /oklch\([^)]*\)/g,
-            'rgb(0,0,0)'
-          );
-        });
+        // 2. 클론 문서에서 모든 스타일시트 제거 (oklch 파싱 오류 방지)
+        // computed style이 이미 인라인되었으므로 외부 CSS 불필요
+        _clonedDoc
+          .querySelectorAll('link[rel="stylesheet"], style')
+          .forEach((el) => el.remove());
       },
     });
 
