@@ -113,6 +113,14 @@ export function createAppLayout() {
             </div>
           </div>
         </div>
+        <div class="panel-card" id="survivalCurveCard" style="display: none;">
+          <div class="panel-header">
+            <h3 class="panel-title">${t('panel.survivalCurve')}</h3>
+          </div>
+          <div class="chart-area" style="height: 380px;">
+            <canvas id="survivalChart"></canvas>
+          </div>
+        </div>
       </div>
 
       <!-- Churn Panel -->
@@ -132,6 +140,12 @@ export function createAppLayout() {
             </div>
             <div id="insightsContainer" class="insights-wrap"></div>
           </div>
+        </div>
+        <div class="panel-card" id="statsTestsCard" style="display: none;">
+          <div class="panel-header">
+            <h3 class="panel-title">${t('panel.statisticalTests')}</h3>
+          </div>
+          <div id="statsTestsContainer" class="stats-tests-wrap"></div>
         </div>
         <div class="panel-card">
           <div class="panel-header">

@@ -194,6 +194,38 @@ export default {
   'summary.gradeC': '\uc8fc\uc758',
   'summary.gradeD': '\uc704\ud5d8',
 
+  // Panel — statistics
+  'panel.survivalCurve': 'Kaplan-Meier \uc0dd\uc874 \uace1\uc120',
+  'panel.statisticalTests': '\ud1b5\uacc4 \uac80\uc815',
+
+  // Statistics
+  'stats.survivalRate': '\uc0dd\uc874\uc728',
+  'stats.survivalPct': '\uc0dd\uc874\uc728 (%)',
+  'stats.weeksFromSignup': '\uac00\uc785 \ud6c4 \uc8fc\ucc28',
+  'stats.atRisk': '\uc704\ud5d8 \ub300\uc0c1',
+  'stats.events': '\uc774\ud0c8 \uc774\ubca4\ud2b8',
+  'stats.significant': '\uc720\uc758\ubbf8\ud568 (p<0.05)',
+  'stats.notSignificant': '\uc720\uc758\ud558\uc9c0 \uc54a\uc74c',
+  'stats.chiSquare': '\uce74\uc774\uc81c\uacf1 \uac80\uc815',
+  'stats.chiSquareDesc':
+    '\ucf54\ud638\ud2b8\uc640 \uc774\ud0c8 \uc704\ud5d8 \ub808\ubca8 \uac04\uc758 \ub3c5\ub9bd\uc131 \uac80\uc815',
+  'stats.chiSquareSig':
+    '\ucf54\ud638\ud2b8\uc5d0 \ub530\ub77c \uc774\ud0c8 \uc704\ud5d8 \ubd84\ud3ec\uac00 \ud1b5\uacc4\uc801\uc73c\ub85c \uc720\uc758\ubbf8\ud558\uac8c \ub2e4\ub985\ub2c8\ub2e4.',
+  'stats.chiSquareNs':
+    '\ucf54\ud638\ud2b8 \uac04 \uc774\ud0c8 \uc704\ud5d8 \ubd84\ud3ec\uc5d0 \ud1b5\uacc4\uc801\uc73c\ub85c \uc720\uc758\ubbf8\ud55c \ucc28\uc774\uac00 \uc5c6\uc2b5\ub2c8\ub2e4.',
+  'stats.logRank': 'Log-Rank \uac80\uc815',
+  'stats.logRankDesc': '\ucd08\uae30 vs \ud6c4\uae30 \ucf54\ud638\ud2b8\uc758 \uc0dd\uc874 \uace1\uc120 \ube44\uad50',
+  'stats.testStat': '\uac80\uc815 \ud1b5\uacc4\ub7c9',
+  'stats.logRankGroups': '{{g1}} vs {{g2}}. ',
+  'stats.logRankSig':
+    '\ub450 \uadf8\ub8f9\uc758 \uc0dd\uc874 \uace1\uc120\uc774 \ud1b5\uacc4\uc801\uc73c\ub85c \uc720\uc758\ubbf8\ud558\uac8c \ub2e4\ub985\ub2c8\ub2e4.',
+  'stats.logRankNs':
+    '\ub450 \uadf8\ub8f9 \uac04 \uc0dd\uc874 \uace1\uc120\uc5d0 \uc720\uc758\ubbf8\ud55c \ucc28\uc774\uac00 \uc5c6\uc2b5\ub2c8\ub2e4.',
+  'stats.medianSurvival': '\uc911\uc559 \uc0dd\uc874 \uc2dc\uac04',
+  'stats.medianWeeks': '\uc8fc\ucc28',
+  'stats.medianDesc':
+    '\uc0ac\uc6a9\uc790\uc758 50%\uac00 {{weeks}}\uc8fc\ucc28\uae4c\uc9c0 \uc0dd\uc874\ud569\ub2c8\ub2e4.',
+
   // PDF modal
   'pdf.preview': 'PDF \ubbf8\ub9ac\ubcf4\uae30',
   'pdf.download': 'PDF \ub2e4\uc6b4\ub85c\ub4dc',

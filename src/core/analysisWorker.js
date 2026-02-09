@@ -1,37 +1,47 @@
 // analysisWorker.js - 계산 집약적 분석 작업을 수행하는 Web Worker
 import { analyzeCohort } from './cohortAnalysis.js';
-import { analyzeChurn } from './churnAnalysis.js';
+import { analyzeChurn, analyzeUserActivity } from './churnAnalysis.js';
 import { predictLTV } from './ltvPrediction.js';
+import { runStatisticalTests } from './statisticalTests.js';
 
 self.onmessage = (e) => {
-    const { type, data } = e.data;
+  const { type, data } = e.data;
 
-    if (type === 'ANALYZE') {
-        try {
-            // 1. 코호트 분석
-            const cohortResult = analyzeCohort(data);
+  if (type === 'ANALYZE') {
+    try {
+      // 1. 코호트 분석
+      const cohortResult = analyzeCohort(data);
 
-            // 2. Churn 분석
-            const churnResult = analyzeChurn(data, cohortResult.cohortInfo);
+      // 2. Churn 분석
+      const churnResult = analyzeChurn(data, cohortResult.cohortInfo);
 
-            // 3. LTV 예측
-            const ltvResult = predictLTV(cohortResult.retentionMatrix);
+      // 3. LTV 예측
+      const ltvResult = predictLTV(cohortResult.retentionMatrix);
 
-            // 결과 전송
-            self.postMessage({
-                type: 'SUCCESS',
-                payload: {
-                    cohortResult,
-                    churnResult,
-                    ltvResult,
-                }
-            });
+      // 4. 통계 검정 (Chi-Square, Kaplan-Meier, Log-Rank)
+      const userActivity = analyzeUserActivity(data, cohortResult.cohortInfo);
+      const statsResult = runStatisticalTests(
+        data,
+        cohortResult.cohortInfo,
+        churnResult,
+        userActivity
+      );
 
-        } catch (error) {
-            self.postMessage({
-                type: 'ERROR',
-                error: error.message
-            });
-        }
+      // 결과 전송
+      self.postMessage({
+        type: 'SUCCESS',
+        payload: {
+          cohortResult,
+          churnResult,
+          ltvResult,
+          statsResult,
+        },
+      });
+    } catch (error) {
+      self.postMessage({
+        type: 'ERROR',
+        error: error.message,
+      });
     }
+  }
 };

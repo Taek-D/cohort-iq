@@ -185,6 +185,37 @@ export default {
   'summary.gradeC': 'Caution',
   'summary.gradeD': 'Critical',
 
+  // Panel — statistics
+  'panel.survivalCurve': 'Kaplan-Meier Survival Curve',
+  'panel.statisticalTests': 'Statistical Tests',
+
+  // Statistics
+  'stats.survivalRate': 'Survival Rate',
+  'stats.survivalPct': 'Survival Rate (%)',
+  'stats.weeksFromSignup': 'Weeks from Signup',
+  'stats.atRisk': 'At Risk',
+  'stats.events': 'Churn Events',
+  'stats.significant': 'Significant (p<0.05)',
+  'stats.notSignificant': 'Not Significant',
+  'stats.chiSquare': 'Chi-Square Test',
+  'stats.chiSquareDesc':
+    'Test of independence between cohort and churn risk level',
+  'stats.chiSquareSig':
+    'Churn risk distribution differs significantly across cohorts.',
+  'stats.chiSquareNs':
+    'No statistically significant difference in churn risk across cohorts.',
+  'stats.logRank': 'Log-Rank Test',
+  'stats.logRankDesc': 'Survival curve comparison: early vs late cohorts',
+  'stats.testStat': 'Test Statistic',
+  'stats.logRankGroups': '{{g1}} vs {{g2}}. ',
+  'stats.logRankSig':
+    'The two groups have significantly different survival curves.',
+  'stats.logRankNs':
+    'No significant difference in survival curves between the two groups.',
+  'stats.medianSurvival': 'Median Survival Time',
+  'stats.medianWeeks': 'Weeks',
+  'stats.medianDesc': '50% of users survive until week {{weeks}}.',
+
   // PDF modal
   'pdf.preview': 'PDF Preview',
   'pdf.download': 'Download PDF',

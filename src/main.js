@@ -26,6 +26,10 @@ import {
   renderLTVComparisonTable,
 } from './visualization/ltvVisualization.js';
 import {
+  renderSurvivalCurve,
+  renderStatisticsCards,
+} from './visualization/statisticsRenderer.js';
+import {
   validateCSVFile,
   formatStatusHTML,
   formatValidationErrorsHTML,
@@ -37,10 +41,11 @@ import { t, setLocale } from './i18n/index.js';
 
 // ─── State ───
 
-let charts = { heatmap: null, trend: null, risk: null, ltvBar: null, ltvTrend: null };
-let analysisResults = { cohort: null, churn: null, ltv: null };
+let charts = { heatmap: null, trend: null, risk: null, ltvBar: null, ltvTrend: null, survival: null };
+let analysisResults = { cohort: null, churn: null, ltv: null, stats: null };
 let churnRendered = false;
 let ltvRendered = false;
+let statsRendered = false;
 
 // ─── Web Worker ───
 
@@ -52,7 +57,7 @@ const analysisWorker = new Worker(
 analysisWorker.onmessage = (e) => {
   const { type, payload, error } = e.data;
   if (type === 'SUCCESS') {
-    handleAnalysisSuccess(payload.cohortResult, payload.churnResult, payload.ltvResult);
+    handleAnalysisSuccess(payload.cohortResult, payload.churnResult, payload.ltvResult, payload.statsResult);
   } else if (type === 'ERROR') {
     showStatus(t('status.analysisError', { error }), 'error');
   }
@@ -95,6 +100,7 @@ window.addEventListener('locale-change', () => {
 
     churnRendered = false;
     ltvRendered = false;
+    statsRendered = false;
 
     charts.heatmap = renderRetentionHeatmap(
       document.getElementById('heatmapChart'),
@@ -104,6 +110,8 @@ window.addEventListener('locale-change', () => {
       document.getElementById('trendChart'),
       analysisResults.cohort.retentionMatrix
     );
+
+    renderStatsVisuals();
 
     const reportBtn = document.getElementById('generateReportBtn');
     reportBtn.addEventListener('click', () => generateAndShowReport());
@@ -178,9 +186,10 @@ function switchToTab(tabName) {
       p.classList.toggle('active', p.id === `panel-${tabName}`)
     );
 
-  if (tabName === 'churn' && !churnRendered && analysisResults.churn) {
+  if (tabName === 'churn' && analysisResults.churn) {
     requestAnimationFrame(() => {
-      renderChurnVisuals();
+      if (!churnRendered) renderChurnVisuals();
+      if (!statsRendered && analysisResults.stats) renderStatsOnChurnTab();
     });
   }
 
@@ -318,13 +327,15 @@ function analyzeAndVisualize(validatedData) {
   analysisWorker.postMessage({ type: 'ANALYZE', data: validatedData });
 }
 
-function handleAnalysisSuccess(cohortResult, churnResult, ltvResult) {
+function handleAnalysisSuccess(cohortResult, churnResult, ltvResult, statsResult) {
   try {
     analysisResults.cohort = cohortResult;
     analysisResults.churn = churnResult;
     analysisResults.ltv = ltvResult;
+    analysisResults.stats = statsResult || null;
     churnRendered = false;
     ltvRendered = false;
+    statsRendered = false;
 
     // Show results
     const resultsArea = document.getElementById('resultsArea');
@@ -346,6 +357,7 @@ function handleAnalysisSuccess(cohortResult, churnResult, ltvResult) {
     destroyChart(charts.risk);
     destroyChart(charts.ltvBar);
     destroyChart(charts.ltvTrend);
+    destroyChart(charts.survival);
 
     // Render retention charts (visible tab)
     charts.heatmap = renderRetentionHeatmap(
@@ -356,6 +368,9 @@ function handleAnalysisSuccess(cohortResult, churnResult, ltvResult) {
       document.getElementById('trendChart'),
       cohortResult.retentionMatrix
     );
+
+    // Render survival curve on retention tab
+    renderStatsVisuals();
 
     // Setup report button
     const reportBtn = document.getElementById('generateReportBtn');
@@ -370,6 +385,36 @@ function handleAnalysisSuccess(cohortResult, churnResult, ltvResult) {
     }, 100);
   } catch (error) {
     showStatus(t('status.renderError', { message: error.message }), 'error');
+  }
+}
+
+// ─── Statistics ───
+
+function renderStatsVisuals() {
+  const stats = analysisResults.stats;
+  if (!stats || !stats.kaplanMeier || stats.kaplanMeier.survivalFunction.length === 0) return;
+
+  const card = document.getElementById('survivalCurveCard');
+  if (card) {
+    card.style.display = '';
+    destroyChart(charts.survival);
+    charts.survival = renderSurvivalCurve(
+      document.getElementById('survivalChart'),
+      stats.kaplanMeier
+    );
+  }
+}
+
+function renderStatsOnChurnTab() {
+  const stats = analysisResults.stats;
+  if (!stats) return;
+
+  const card = document.getElementById('statsTestsCard');
+  const container = document.getElementById('statsTestsContainer');
+  if (card && container) {
+    card.style.display = '';
+    container.innerHTML = renderStatisticsCards(stats);
+    statsRendered = true;
   }
 }
 

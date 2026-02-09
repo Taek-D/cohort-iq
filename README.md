@@ -2,13 +2,14 @@
 
 **3초 만에 구독 비즈니스의 건강을 진단하는 코호트 분석 도구**
 
-CSV 파일 업로드만으로 코호트 리텐션을 분석하고, 활동 패턴 기반 스코어링으로 이탈 위험 사용자를 식별하여 1-Page Executive Summary PDF를 자동 생성합니다.
+CSV 파일 업로드만으로 코호트 리텐션을 분석하고, 활동 패턴 기반 스코어링으로 이탈 위험 사용자를 식별하며, 통계 검정으로 유의성을 검증하고, LTV를 예측하여 1-Page Executive Summary PDF를 자동 생성합니다.
 
 [![Live Demo](https://img.shields.io/badge/demo-cohort--iq.vercel.app-blue)](https://cohort-iq.vercel.app)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Tests](https://img.shields.io/badge/tests-45%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-80%20passing-brightgreen)
+![i18n](https://img.shields.io/badge/i18n-KO%20%7C%20EN-blue)
 
-> **[Live Demo](https://cohort-iq.vercel.app)** - 샘플 데이터로 즉시 체험해보세요
+> **[Live Demo](https://cohort-iq.vercel.app)** - 샘플 데이터(1,010명)로 즉시 체험해보세요
 
 <p align="center">
   <img src="docs/demo.gif" alt="CohortIQ Demo" width="720">
@@ -22,11 +23,13 @@ CSV 파일 업로드만으로 코호트 리텐션을 분석하고, 활동 패턴
 
 - **코호트 분석**: 가입일 기준 사용자 그룹화 및 주차별 리텐션 추적
 - **고객 세그먼테이션**: 활동 패턴 기반 이탈 위험 분류 (Recency, Frequency, Consistency)
-- **비즈니스 메트릭 설계**: 건강도 점수, 리텐션율, Churn Rate 자동 산출
-- **데이터 시각화**: 히트맵, 트렌드 차트, 도넛 차트로 패턴 시각화
-- **인사이트 도출**: 데이터 기반 실행 가능한 비즈니스 추천 자동 생성
-- **통계 검정**: Chi-Square 독립성 검정, Kaplan-Meier 생존 분석, Log-Rank Test
+- **LTV 예측**: 지수 감쇠 모델(Exponential Decay)을 통한 코호트별 고객 생애 가치 추정
+- **통계 검정**: Chi-Square 독립성 검정, Kaplan-Meier 생존 분석, Log-Rank Test — 웹앱 내 실시간 수행
+- **비즈니스 메트릭 설계**: 건강도 점수, 리텐션율, Churn Rate, Median Survival 자동 산출
+- **데이터 시각화**: 히트맵, 생존곡선, 트렌드/바/도넛 차트로 패턴 시각화
+- **인사이트 도출**: 데이터 + 통계 기반 실행 가능한 비즈니스 추천 자동 생성
 - **SQL 구현**: PostgreSQL CTE/Window Function으로 분석 로직 재구현
+- **다국어 지원**: 한국어/영어 전환 (142개 번역 키)
 
 ---
 
@@ -35,23 +38,36 @@ CSV 파일 업로드만으로 코호트 리텐션을 분석하고, 활동 패턴
 ### 1. 코호트 리텐션 분석
 - 가입일 기준 주간(Weekly) 코호트 자동 생성
 - 리텐션 히트맵 + 트렌드 라인 차트 시각화
+- **Kaplan-Meier 생존곡선** — 사용자 이탈 패턴의 시간적 분포
 - 처리 속도: 10,000행 기준 3초 이내
 
 <img src="docs/screenshot-heatmap.png" alt="코호트 리텐션 히트맵" width="720">
 
-### 2. Churn 위험 예측
+### 2. Churn 위험 예측 + 통계 검정
 - 활동 패턴(Recency, Frequency, Consistency) 기반 위험 스코어링 (0-100)
 - CRITICAL / HIGH / MEDIUM / LOW 4단계 세그먼트 분류
+- **Chi-Square 검정**: 코호트와 이탈 위험 간 독립성 검정 (p-value)
+- **Log-Rank 검정**: 초기 vs 후기 코호트 생존곡선 비교
 - 실행 가능한 인사이트 및 추천 조치 자동 생성
 
 <img src="docs/screenshot-churn.png" alt="Churn 위험 분석" width="720">
 
-### 3. Executive Summary PDF
+### 3. LTV 예측
+- 지수 감쇠 모델: λ = -ln(R_last / R_prev) / Δt
+- 코호트별 관측 LTV + 예측 LTV 비교 차트
+- 신뢰도(High/Medium/Low) 기반 예측 품질 평가
+- ARPU 조정을 통한 매출 시나리오 분석
+
+### 4. Executive Summary PDF
 - 건강도 점수 (A/B/C/D 등급)
-- 리텐션 추이 + Churn 위험 요약
+- 리텐션 추이 + Churn 위험 + LTV 요약
 - 1-Page PDF 다운로드
 
 <img src="docs/screenshot-summary.png" alt="Executive Summary" width="720">
+
+### 5. 다국어 지원 (i18n)
+- 한국어(KO) / 영어(EN) 실시간 전환
+- 142개 번역 키, 분석 결과 및 인사이트 포함
 
 ---
 
@@ -59,8 +75,9 @@ CSV 파일 업로드만으로 코호트 리텐션을 분석하고, 활동 패턴
 
 ### 온라인 (권장)
 1. [https://cohort-iq.vercel.app](https://cohort-iq.vercel.app) 접속
-2. "샘플 데이터로 체험해보기" 클릭
-3. 분석 결과 확인 후 PDF 리포트 다운로드
+2. "샘플 체험" 클릭 (1,010명 사용자 데이터)
+3. Retention → Churn Risk → LTV 탭 전환으로 분석 결과 확인
+4. PDF 리포트 다운로드
 
 ### 로컬 실행
 ```bash
@@ -72,7 +89,7 @@ npm run dev
 
 ### 테스트
 ```bash
-npm run test     # 단위 테스트 (45개)
+npm run test     # 단위 테스트 (80개)
 npm run build    # 프로덕션 빌드
 ```
 
@@ -100,17 +117,34 @@ U002,2025-01-06,2025-01-06
 
 ---
 
+## 통계 분석 방법론
+
+| 검정 | 구현 | 목적 |
+|------|------|------|
+| **Chi-Square** (χ²) | 순수 JS (불완전 감마함수) | 코호트별 이탈 위험 분포 독립성 |
+| **Kaplan-Meier** | Product-Limit Estimator | 사용자 생존곡선, 중앙 생존시간 |
+| **Log-Rank** | Mantel-Cox 검정 | 초기/후기 코호트 생존곡선 차이 |
+| **LTV 예측** | 지수 감쇠 모델 | 코호트별 고객 생애 가치 추정 |
+
+웹앱에서 분석 시 자동으로 통계 검정이 수행되며, p-value와 유의성 판단이 함께 표시됩니다.
+
+Python 노트북(`analysis/cohort_eda.ipynb`)에서는 lifelines, scipy를 사용한 추가 분석도 확인 가능합니다.
+
+---
+
 ## 기술 스택
 
 | 분류 | 기술 |
 |------|------|
 | Core | Vanilla JavaScript (ES6+ Module) |
 | Build | Vite 7 |
-| Test | Vitest |
+| Test | Vitest (80 tests) |
 | Data | PapaParse, date-fns |
 | Visualization | Chart.js + chartjs-chart-matrix |
+| Statistics | 순수 JS (Chi-Square, KM, Log-Rank, Gamma functions) |
 | Export | jsPDF, html2canvas-pro |
 | Styling | Tailwind CSS 4 |
+| i18n | Custom module (KO/EN, 142 keys) |
 | Performance | Web Worker |
 | Hosting | Vercel |
 | Analysis | Python, pandas, scipy, lifelines |
@@ -123,8 +157,8 @@ U002,2025-01-06,2025-01-06
 | 문서 | 설명 |
 |------|------|
 | [분석 방법론](docs/METHODOLOGY.md) | 스코어링 알고리즘, 임계값 근거, 업계 벤치마크, 통계 검정 |
-| [분석 사례](docs/CASE_STUDY.md) | 200명 샘플 데이터 기반 비즈니스 분석 시뮬레이션 |
-| [EDA 노트북](analysis/cohort_eda.ipynb) | Python/pandas 탐색적 데이터 분석 + 통계 검정 |
+| [분석 사례](docs/CASE_STUDY.md) | 샘플 데이터 기반 비즈니스 분석 시뮬레이션 |
+| [EDA 노트북](analysis/cohort_eda.ipynb) | Python/pandas EDA + Chi-Square, Kaplan-Meier, Log-Rank (실행 결과 포함) |
 | [SQL 쿼리](analysis/sql_queries.md) | PostgreSQL 코호트 분석 쿼리 6종 |
 | [변경 이력](CHANGELOG.md) | 버전별 변경사항 |
 
@@ -139,23 +173,34 @@ cohort-iq/
 │   │   ├── dataValidator.js      # CSV 검증 + 컬럼 자동 매칭
 │   │   ├── cohortAnalysis.js     # 코호트 그룹화 + 리텐션 계산
 │   │   ├── churnAnalysis.js      # 활동 패턴 기반 위험 스코어링
+│   │   ├── ltvPrediction.js      # 지수 감쇠 LTV 예측 모델
+│   │   ├── statisticalTests.js   # Chi-Square, Kaplan-Meier, Log-Rank
 │   │   ├── analysisWorker.js     # Web Worker (분석 오프로딩)
-│   │   └── *.test.js             # 단위 테스트 (45개)
+│   │   └── *.test.js             # 단위 테스트 (80개)
 │   ├── visualization/
 │   │   ├── heatmapRenderer.js    # 히트맵 + 트렌드 차트
-│   │   └── churnVisualization.js # 위험 도넛 차트 + 테이블
+│   │   ├── churnVisualization.js # 위험 도넛 차트 + 테이블
+│   │   ├── ltvVisualization.js   # LTV 바/트렌드 차트 + 비교 테이블
+│   │   └── statisticsRenderer.js # Kaplan-Meier 생존곡선 + 검정 결과 카드
+│   ├── i18n/
+│   │   ├── index.js              # i18n 모듈 (setLocale, t, getLocale)
+│   │   ├── ko.js                 # 한국어 번역 (142+ 키)
+│   │   └── en.js                 # 영어 번역
+│   ├── ui/
+│   │   ├── appLayout.js          # 앱 레이아웃 HTML 템플릿
+│   │   └── helpers.js            # UI 유틸리티 함수
 │   ├── export/
 │   │   ├── summaryGenerator.js   # Executive Summary HTML
 │   │   └── pdfExporter.js        # HTML → PDF 변환
 │   ├── main.js                   # 앱 진입점
-│   └── style.css                 # Tailwind CSS
+│   └── style.css                 # Tailwind CSS + 커스텀 디자인 시스템
 ├── analysis/
-│   ├── cohort_eda.ipynb          # Python EDA 노트북 (25셀)
+│   ├── cohort_eda.ipynb          # Python EDA 노트북 (36셀, 실행 결과 포함)
 │   ├── sql_queries.md            # PostgreSQL 쿼리 6종
 │   ├── schema.sql                # 테이블 DDL + 샘플 데이터
 │   └── requirements.txt          # Python 의존성
 ├── public/
-│   └── sample_cohort_data.csv    # 샘플 데이터 (200명, 871행)
+│   └── sample_cohort_data.csv    # 샘플 데이터 (1,010명, 2,306행, 16코호트)
 ├── index.html
 ├── vite.config.js
 └── package.json
@@ -165,6 +210,8 @@ cohort-iq/
 ```
 dataValidator → cohortAnalysis → heatmapRenderer
               → churnAnalysis  → churnVisualization
+              → ltvPrediction  → ltvVisualization
+              → statisticalTests → statisticsRenderer
               → summaryGenerator → pdfExporter
               → analysisWorker (Web Worker)
 ```
@@ -175,9 +222,11 @@ dataValidator → cohortAnalysis → heatmapRenderer
 
 | 메트릭 | 목표 | 실측 |
 |--------|------|------|
-| 코호트 분석 (17행) | 3초 | 1ms |
-| Churn 스코어링 (10명) | 3초 | 5ms |
-| Summary 생성 | 3초 | 10ms |
+| 코호트 분석 (1,010명) | 3초 | ~50ms |
+| Churn 스코어링 (1,010명) | 3초 | ~15ms |
+| 통계 검정 (Chi², KM, Log-Rank) | 3초 | ~10ms |
+| LTV 예측 (16코호트) | 3초 | ~5ms |
+| Summary 생성 | 3초 | ~10ms |
 | PDF 다운로드 | 5초 | ~3초 |
 
 ---
