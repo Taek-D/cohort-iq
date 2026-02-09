@@ -24,7 +24,6 @@ self.onmessage = (e) => {
             });
 
         } catch (error) {
-            console.error('Worker Error:', error);
             self.postMessage({
                 type: 'ERROR',
                 error: error.message

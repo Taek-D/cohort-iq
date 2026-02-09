@@ -121,9 +121,8 @@ export function showPDFPreview(htmlContent) {
         downloadBtn.textContent = '💾 PDF 다운로드';
         downloadBtn.disabled = false;
       }, 2000);
-    } catch (error) {
+    } catch {
       downloadBtn.textContent = '❌ 오류 발생';
-      console.error('PDF 생성 오류:', error);
       setTimeout(() => {
         downloadBtn.textContent = '💾 PDF 다운로드';
         downloadBtn.disabled = false;

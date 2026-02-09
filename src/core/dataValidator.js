@@ -87,14 +87,6 @@ export function validateCohortData(data) {
     }
 
     return {
-        // 에러가 있어도 유효한 데이터가 있으면 진행 가능하게 할 수도 있지만, 
-        // 현재 로직은 errors.length === 0 일때만 완전한 성공으로 간주.
-        // 하지만 행별 에러는 해당 행만 제외하고 진행하는 것이 일반적임.
-        // 여기서는 '치명적 에러'가 아니면 valid: true로 반환하고 errors에 로그를 남기는 방식으로 감.
-        // 단, 기존 로직과의 호환성을 위해 errors가 있으면 valid: false로 유지하되, 
-        // 호출부에서 errors가 있어도 validData가 있으면 선택적으로 진행할 수 있게 구조 변경 고려.
-        // 현재 요구사항: "에러가 있으면 중단" -> 그대로 유지.
-
         valid: errors.length === 0,
         data: validData,
         errors,

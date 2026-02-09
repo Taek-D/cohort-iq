@@ -33,8 +33,7 @@ analysisWorker.onmessage = (e) => {
   }
 };
 
-analysisWorker.onerror = (error) => {
-  console.error('Worker Error Event:', error);
+analysisWorker.onerror = () => {
   showStatus('분석 워커에서 심각한 오류가 발생했습니다.', 'error');
 };
 
@@ -178,8 +177,7 @@ document.querySelector('#app').innerHTML = `
 `;
 
 // Global Error Handler
-window.onerror = function (message, source, lineno, colno, error) {
-  console.error('Global Error:', message, error);
+window.onerror = function (message) {
   showStatus(`시스템 오류 발생: ${message}`, 'error');
   return false;
 };
@@ -277,7 +275,7 @@ function processCSV(csvText) {
       }
 
       // 성공 메시지 및 통계
-      const uniqueUsers = validation.uniqueUsers ? ` (사용자: ${validation.stats.uniqueUsers}명)` : '';
+      const uniqueUsers = validation.stats?.uniqueUsers ? ` (사용자: ${validation.stats.uniqueUsers}명)` : '';
       showStatus(`데이터 검증 완료! (유효: ${validation.stats.valid.toLocaleString()}행${uniqueUsers})`, 'success');
 
       // 분석 시작 (약간의 지연으로 UI 렌더링 보장)
@@ -354,7 +352,6 @@ function handleAnalysisSuccess(cohortResult, churnResult) {
     }, 100);
 
   } catch (error) {
-    console.error("UI Rendering Error:", error);
     showStatus(`결과 렌더링 중 오류가 발생했습니다: ${error.message}`, 'error');
   }
 }
@@ -395,7 +392,6 @@ async function generateAndShowReport() {
 
   } catch (error) {
     showStatus('리포트 생성 중 오류가 발생했습니다: ' + error.message, 'error');
-    console.error(error);
   } finally {
     btn.innerHTML = originalText;
     btn.disabled = false;
