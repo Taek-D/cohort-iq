@@ -194,6 +194,41 @@ Churn Score     = min(50, (Low Risk 사용자 비율 / 60) × 50)
 
 ---
 
+## 6. 통계적 검증 방법론
+
+본 프로젝트의 Python 분석 노트북(`analysis/cohort_eda.ipynb`)에서 수행한 통계 검정입니다.
+
+### 6-1. 코호트 간 리텐션 차이 검정
+
+- **검정 방법**: Chi-Square Test of Independence
+- **귀무가설 (H0)**: 코호트 소속과 Week N 리텐션(활성/비활성)은 독립이다
+- **대립가설 (H1)**: 코호트에 따라 리텐션율이 유의하게 다르다
+- **유의수준**: α = 0.05
+- **전제 조건**: 기대 빈도 5 이상 (소표본이면 Fisher's exact test 대체)
+- **해석**: p < 0.05이면 코호트 간 리텐션 차이가 우연이 아님을 의미
+
+### 6-2. 생존 분석 (Kaplan-Meier)
+
+- **목적**: 사용자의 "제품 내 생존 곡선" 추정
+- **이벤트 정의**: 마지막 활동 이후 4주(28일) 경과 시 "이탈(event=1)"로 판정
+- **Censoring**: 관측 기간 종료 시점까지 활동 중인 사용자는 right-censored
+- **라이브러리**: `lifelines.KaplanMeierFitter`
+
+### 6-3. 코호트 간 생존 곡선 비교 (Log-Rank Test)
+
+- **검정 방법**: Log-Rank Test (Mantel-Cox)
+- **귀무가설**: 모든 코호트의 생존 함수가 동일하다
+- **유의수준**: α = 0.05
+- **해석**: p < 0.05이면 특정 코호트의 이탈 패턴이 유의하게 다름 → 해당 시기의 온보딩/제품 변경 조사 필요
+
+### 6-4. 주의사항
+
+- 샘플 크기가 작으면 (코호트당 <30명) 검정력(power)이 낮아 유의한 차이를 감지하지 못할 수 있음
+- 다중 비교 시 Bonferroni 보정을 고려해야 하나, 탐색적 분석 단계에서는 미적용
+- 통계적 유의성 ≠ 실무적 유의성: 효과 크기(effect size)도 함께 보고
+
+---
+
 ## 참고 문헌
 
 1. Fader, P. S., & Hardie, B. G. S. (2009). "Probability Models for Customer-Base Analysis." *Journal of Interactive Marketing*, 23(1), 61-69.
@@ -201,3 +236,6 @@ Churn Score     = min(50, (Low Risk 사용자 비율 / 60) × 50)
 3. Mixpanel. (2023). *Product Benchmarks Report*. [mixpanel.com/blog/product-benchmarks](https://mixpanel.com/blog)
 4. Amplitude. (2024). *Product Analytics Benchmarks Report*. [amplitude.com/blog](https://amplitude.com/blog)
 5. Eyal, N. (2014). *Hooked: How to Build Habit-Forming Products*. Portfolio/Penguin.
+6. Davidson-Pilon, C. (2019). *lifelines: survival analysis in Python*. Journal of Open Source Software, 4(40), 1317.
+7. Kaplan, E. L., & Meier, P. (1958). "Nonparametric Estimation from Incomplete Observations." *Journal of the American Statistical Association*, 53(282), 457-481.
+8. Bland, J. M., & Altman, D. G. (2004). "The logrank test." *BMJ*, 328(7447), 1073.

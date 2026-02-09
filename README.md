@@ -6,7 +6,7 @@ CSV 파일 업로드만으로 코호트 리텐션을 분석하고, 활동 패턴
 
 [![Live Demo](https://img.shields.io/badge/demo-cohort--iq.vercel.app-blue)](https://cohort-iq.vercel.app)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Tests](https://img.shields.io/badge/tests-25%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-45%20passing-brightgreen)
 
 > **[Live Demo](https://cohort-iq.vercel.app)** - 샘플 데이터로 즉시 체험해보세요
 
@@ -25,6 +25,8 @@ CSV 파일 업로드만으로 코호트 리텐션을 분석하고, 활동 패턴
 - **비즈니스 메트릭 설계**: 건강도 점수, 리텐션율, Churn Rate 자동 산출
 - **데이터 시각화**: 히트맵, 트렌드 차트, 도넛 차트로 패턴 시각화
 - **인사이트 도출**: 데이터 기반 실행 가능한 비즈니스 추천 자동 생성
+- **통계 검정**: Chi-Square 독립성 검정, Kaplan-Meier 생존 분석, Log-Rank Test
+- **SQL 구현**: PostgreSQL CTE/Window Function으로 분석 로직 재구현
 
 ---
 
@@ -70,7 +72,7 @@ npm run dev
 
 ### 테스트
 ```bash
-npm run test     # 단위 테스트 (25개)
+npm run test     # 단위 테스트 (45개)
 npm run build    # 프로덕션 빌드
 ```
 
@@ -111,6 +113,8 @@ U002,2025-01-06,2025-01-06
 | Styling | Tailwind CSS 4 |
 | Performance | Web Worker |
 | Hosting | Vercel |
+| Analysis | Python, pandas, scipy, lifelines |
+| Database | PostgreSQL (SQL 쿼리 예시) |
 
 ---
 
@@ -118,8 +122,10 @@ U002,2025-01-06,2025-01-06
 
 | 문서 | 설명 |
 |------|------|
-| [분석 방법론](docs/METHODOLOGY.md) | 스코어링 알고리즘, 임계값 근거, 업계 벤치마크 |
+| [분석 방법론](docs/METHODOLOGY.md) | 스코어링 알고리즘, 임계값 근거, 업계 벤치마크, 통계 검정 |
 | [분석 사례](docs/CASE_STUDY.md) | 200명 샘플 데이터 기반 비즈니스 분석 시뮬레이션 |
+| [EDA 노트북](analysis/cohort_eda.ipynb) | Python/pandas 탐색적 데이터 분석 + 통계 검정 |
+| [SQL 쿼리](analysis/sql_queries.md) | PostgreSQL 코호트 분석 쿼리 6종 |
 | [변경 이력](CHANGELOG.md) | 버전별 변경사항 |
 
 ---
@@ -134,7 +140,7 @@ cohort-iq/
 │   │   ├── cohortAnalysis.js     # 코호트 그룹화 + 리텐션 계산
 │   │   ├── churnAnalysis.js      # 활동 패턴 기반 위험 스코어링
 │   │   ├── analysisWorker.js     # Web Worker (분석 오프로딩)
-│   │   └── *.test.js             # 단위 테스트 (14개)
+│   │   └── *.test.js             # 단위 테스트 (45개)
 │   ├── visualization/
 │   │   ├── heatmapRenderer.js    # 히트맵 + 트렌드 차트
 │   │   └── churnVisualization.js # 위험 도넛 차트 + 테이블
@@ -143,8 +149,13 @@ cohort-iq/
 │   │   └── pdfExporter.js        # HTML → PDF 변환
 │   ├── main.js                   # 앱 진입점
 │   └── style.css                 # Tailwind CSS
+├── analysis/
+│   ├── cohort_eda.ipynb          # Python EDA 노트북 (25셀)
+│   ├── sql_queries.md            # PostgreSQL 쿼리 6종
+│   ├── schema.sql                # 테이블 DDL + 샘플 데이터
+│   └── requirements.txt          # Python 의존성
 ├── public/
-│   └── sample_cohort_data.csv    # 샘플 데이터
+│   └── sample_cohort_data.csv    # 샘플 데이터 (200명, 871행)
 ├── index.html
 ├── vite.config.js
 └── package.json

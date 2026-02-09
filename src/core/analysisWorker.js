@@ -1,6 +1,7 @@
 // analysisWorker.js - 계산 집약적 분석 작업을 수행하는 Web Worker
 import { analyzeCohort } from './cohortAnalysis.js';
 import { analyzeChurn } from './churnAnalysis.js';
+import { predictLTV } from './ltvPrediction.js';
 
 self.onmessage = (e) => {
     const { type, data } = e.data;
@@ -11,15 +12,18 @@ self.onmessage = (e) => {
             const cohortResult = analyzeCohort(data);
 
             // 2. Churn 분석
-            // cohortResult에 cohortInfo가 포함되어 있음
             const churnResult = analyzeChurn(data, cohortResult.cohortInfo);
+
+            // 3. LTV 예측
+            const ltvResult = predictLTV(cohortResult.retentionMatrix);
 
             // 결과 전송
             self.postMessage({
                 type: 'SUCCESS',
                 payload: {
                     cohortResult,
-                    churnResult
+                    churnResult,
+                    ltvResult,
                 }
             });
 

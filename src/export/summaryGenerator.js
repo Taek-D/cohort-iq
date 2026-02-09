@@ -5,9 +5,10 @@ import { format } from 'date-fns';
  * Executive Summary 데이터 준비
  * @param {Object} cohortResult - analyzeCohort 결과
  * @param {Object} churnResult - analyzeChurn 결과
+ * @param {Object} [ltvResult] - predictLTV 결과 (선택적)
  * @returns {Object} Summary 데이터
  */
-export function prepareSummaryData(cohortResult, churnResult) {
+export function prepareSummaryData(cohortResult, churnResult, ltvResult) {
     if (!cohortResult || !churnResult) {
         return {
             metadata: { generatedAt: new Date(), analysisDate: format(new Date(), 'yyyy-MM-dd'), totalCohorts: 0, dateRange: { from: '-', to: '-' } },
@@ -82,6 +83,13 @@ export function prepareSummaryData(cohortResult, churnResult) {
             total: riskSummary.total
         },
         insights: topInsights,
+        ltv: ltvResult ? {
+            averageLTV: ltvResult.summary.averageLTV,
+            bestCohort: ltvResult.summary.bestCohort,
+            worstCohort: ltvResult.summary.worstCohort,
+            trend: ltvResult.summary.ltvTrend,
+            arpu: ltvResult.arpu,
+        } : null,
         performance: {
             cohortAnalysis: cohortPerf.duration,
             churnAnalysis: churnPerf.duration,
@@ -149,7 +157,7 @@ export function getHealthGrade(score) {
  * HTML Summary 템플릿
  */
 export function generateSummaryHTML(summaryData) {
-    const { metadata, keyMetrics, churnRisk, insights } = summaryData;
+    const { metadata, keyMetrics, churnRisk, insights, ltv } = summaryData;
     const healthGrade = getHealthGrade(keyMetrics.healthScore);
 
     return `
@@ -232,6 +240,30 @@ export function generateSummaryHTML(summaryData) {
           </div>
         </div>
       </div>
+
+      <!-- LTV 예측 -->
+      ${ltv ? `
+      <div class="bg-indigo-50 rounded-lg p-6 mb-8">
+        <h2 class="text-xl font-bold text-gray-800 mb-3">💰 LTV 예측</h2>
+        <div class="grid grid-cols-3 gap-4 text-center">
+          <div>
+            <p class="text-sm text-gray-600 mb-1">평균 LTV</p>
+            <p class="text-3xl font-bold text-indigo-600">${ltv.averageLTV.toFixed(2)}</p>
+            <p class="text-xs text-gray-500">ARPU: ${ltv.arpu}</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-600 mb-1">최고 코호트</p>
+            <p class="text-2xl font-bold text-green-600">${ltv.bestCohort ? ltv.bestCohort.ltv.toFixed(2) : '-'}</p>
+            <p class="text-xs text-gray-500">${ltv.bestCohort ? ltv.bestCohort.cohort : '-'}</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-600 mb-1">최저 코호트</p>
+            <p class="text-2xl font-bold text-red-600">${ltv.worstCohort ? ltv.worstCohort.ltv.toFixed(2) : '-'}</p>
+            <p class="text-xs text-gray-500">${ltv.worstCohort ? ltv.worstCohort.cohort : '-'}</p>
+          </div>
+        </div>
+      </div>
+      ` : ''}
 
       <!-- Top 3 인사이트 -->
       <div class="mb-8">

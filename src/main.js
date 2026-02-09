@@ -19,6 +19,12 @@ import {
   generateSummaryHTML,
 } from './export/summaryGenerator.js';
 import { showPDFPreview } from './export/pdfExporter.js';
+import { predictLTV } from './core/ltvPrediction.js';
+import {
+  renderLTVBarChart,
+  renderLTVTrendChart,
+  renderLTVComparisonTable,
+} from './visualization/ltvVisualization.js';
 import {
   validateCSVFile,
   formatStatusHTML,
@@ -30,9 +36,10 @@ import { createAppLayout } from './ui/appLayout.js';
 
 // ─── State ───
 
-let charts = { heatmap: null, trend: null, risk: null };
-let analysisResults = { cohort: null, churn: null };
+let charts = { heatmap: null, trend: null, risk: null, ltvBar: null, ltvTrend: null };
+let analysisResults = { cohort: null, churn: null, ltv: null };
 let churnRendered = false;
+let ltvRendered = false;
 
 // ─── Web Worker ───
 
@@ -44,7 +51,7 @@ const analysisWorker = new Worker(
 analysisWorker.onmessage = (e) => {
   const { type, payload, error } = e.data;
   if (type === 'SUCCESS') {
-    handleAnalysisSuccess(payload.cohortResult, payload.churnResult);
+    handleAnalysisSuccess(payload.cohortResult, payload.churnResult, payload.ltvResult);
   } else if (type === 'ERROR') {
     showStatus(`분석 중 오류가 발생했습니다: ${error}`, 'error');
   }
@@ -117,6 +124,12 @@ function switchToTab(tabName) {
       renderChurnVisuals();
     });
   }
+
+  if (tabName === 'ltv' && !ltvRendered && analysisResults.ltv) {
+    requestAnimationFrame(() => {
+      renderLTVVisuals();
+    });
+  }
 }
 
 function renderChurnVisuals() {
@@ -137,6 +150,42 @@ function renderChurnVisuals() {
 
   churnRendered = true;
 }
+
+function renderLTVVisuals() {
+  const ltvResult = analysisResults.ltv;
+  if (!ltvResult) return;
+
+  if (charts.ltvBar) destroyChart(charts.ltvBar);
+  if (charts.ltvTrend) destroyChart(charts.ltvTrend);
+
+  charts.ltvBar = renderLTVBarChart(
+    document.getElementById('ltvBarChart'),
+    ltvResult.cohortLTVs
+  );
+
+  charts.ltvTrend = renderLTVTrendChart(
+    document.getElementById('ltvTrendChart'),
+    ltvResult.cohortLTVs
+  );
+
+  document.getElementById('ltvTableContainer').innerHTML =
+    renderLTVComparisonTable(ltvResult.cohortLTVs, ltvResult.summary);
+
+  ltvRendered = true;
+}
+
+// LTV Recalculate
+document.getElementById('recalcLTV').addEventListener('click', () => {
+  if (!analysisResults.cohort) return;
+
+  const arpu = parseFloat(document.getElementById('arpuInput').value) || 1;
+  analysisResults.ltv = predictLTV(
+    analysisResults.cohort.retentionMatrix,
+    { arpu }
+  );
+  ltvRendered = false;
+  renderLTVVisuals();
+});
 
 // ─── File Processing ───
 
@@ -223,11 +272,13 @@ function analyzeAndVisualize(validatedData) {
   analysisWorker.postMessage({ type: 'ANALYZE', data: validatedData });
 }
 
-function handleAnalysisSuccess(cohortResult, churnResult) {
+function handleAnalysisSuccess(cohortResult, churnResult, ltvResult) {
   try {
     analysisResults.cohort = cohortResult;
     analysisResults.churn = churnResult;
+    analysisResults.ltv = ltvResult;
     churnRendered = false;
+    ltvRendered = false;
 
     // Show results
     const resultsArea = document.getElementById('resultsArea');
@@ -247,6 +298,8 @@ function handleAnalysisSuccess(cohortResult, churnResult) {
     destroyChart(charts.heatmap);
     destroyChart(charts.trend);
     destroyChart(charts.risk);
+    destroyChart(charts.ltvBar);
+    destroyChart(charts.ltvTrend);
 
     // Render retention charts (visible tab)
     charts.heatmap = renderRetentionHeatmap(
@@ -290,7 +343,8 @@ async function generateAndShowReport() {
   try {
     const summaryData = prepareSummaryData(
       analysisResults.cohort,
-      analysisResults.churn
+      analysisResults.churn,
+      analysisResults.ltv
     );
     const htmlContent = generateSummaryHTML(summaryData);
     showPDFPreview(htmlContent);

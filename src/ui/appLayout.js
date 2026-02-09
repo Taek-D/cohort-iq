@@ -78,6 +78,7 @@ export function createAppLayout() {
       <div class="tab-bar">
         <button class="tab-btn active" data-tab="retention">Retention</button>
         <button class="tab-btn" data-tab="churn">Churn Risk</button>
+        <button class="tab-btn" data-tab="ltv">LTV</button>
       </div>
 
       <!-- Retention Panel -->
@@ -129,6 +130,42 @@ export function createAppLayout() {
             </button>
           </div>
           <div id="riskTableContainer"></div>
+        </div>
+      </div>
+
+      <!-- LTV Panel -->
+      <div class="tab-panel" id="panel-ltv">
+        <div class="ltv-controls">
+          <label class="ltv-label">
+            ARPU (Weekly)
+            <input type="number" id="arpuInput" value="1" min="0" step="0.01"
+                   class="ltv-input" placeholder="1.00" />
+          </label>
+          <button type="button" id="recalcLTV" class="btn-outline">Recalculate</button>
+        </div>
+        <div class="panel-grid">
+          <div class="panel-card">
+            <div class="panel-header">
+              <h3 class="panel-title">Cohort LTV</h3>
+            </div>
+            <div class="chart-area" style="height: 380px;">
+              <canvas id="ltvBarChart"></canvas>
+            </div>
+          </div>
+          <div class="panel-card">
+            <div class="panel-header">
+              <h3 class="panel-title">LTV Trend</h3>
+            </div>
+            <div class="chart-area" style="height: 380px;">
+              <canvas id="ltvTrendChart"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="panel-card">
+          <div class="panel-header">
+            <h3 class="panel-title">Cohort Comparison</h3>
+          </div>
+          <div id="ltvTableContainer"></div>
         </div>
       </div>
 
