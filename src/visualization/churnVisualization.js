@@ -1,5 +1,6 @@
 // churnVisualization.js — Churn Risk Visualization
 import { Chart } from 'chart.js/auto';
+import { t } from '../i18n/index.js';
 
 const tooltip = {
   backgroundColor: '#111827',
@@ -25,7 +26,12 @@ export function renderRiskSegmentChart(canvas, riskSegments) {
   const chart = new Chart(ctx, {
     type: 'doughnut',
     data: {
-      labels: ['Critical', 'High', 'Medium', 'Low'],
+      labels: [
+        t('chart.critical'),
+        t('chart.high'),
+        t('chart.medium'),
+        t('chart.low'),
+      ],
       datasets: [
         {
           data: [summary.critical, summary.high, summary.medium, summary.low],
@@ -87,7 +93,7 @@ export function renderRiskSegmentChart(canvas, riskSegments) {
                 summary.total > 0
                   ? Math.round((value / summary.total) * 100)
                   : 0;
-              return `${label}: ${value} users (${pct}%)`;
+              return `${label}: ${value} ${t('chart.users')} (${pct}%)`;
             },
           },
         },
@@ -99,7 +105,7 @@ export function renderRiskSegmentChart(canvas, riskSegments) {
 }
 
 /**
- * Risk Users Table — right-aligned numbers, English headers
+ * Risk Users Table — right-aligned numbers
  * @param {Array} churnRiskData
  * @param {number} limit
  * @returns {string}
@@ -134,12 +140,12 @@ export function renderRiskUsersTable(churnRiskData, limit = 20) {
       <thead>
         <tr>
           <th style="width: 36px; text-align: right;">#</th>
-          <th>User ID</th>
-          <th>Cohort</th>
-          <th>Risk</th>
-          <th style="text-align: right;">Score</th>
-          <th style="text-align: right;">Last Active</th>
-          <th style="text-align: right;">Activity</th>
+          <th>${t('table.userId')}</th>
+          <th>${t('table.cohort')}</th>
+          <th>${t('table.risk')}</th>
+          <th style="text-align: right;">${t('table.score')}</th>
+          <th style="text-align: right;">${t('table.lastActive')}</th>
+          <th style="text-align: right;">${t('table.activity')}</th>
         </tr>
       </thead>
       <tbody>
@@ -166,7 +172,7 @@ export function renderInsightsCards(insights) {
             ${insight.title}
           </h4>
           <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); white-space: nowrap; margin-left: 12px;">
-            ${insight.affectedUsers} users
+            ${insight.affectedUsers} ${t('insight.users')}
           </span>
         </div>
         <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5; margin: 4px 0 6px;">
@@ -182,7 +188,7 @@ export function renderInsightsCards(insights) {
 
   return (
     cards ||
-    '<p style="text-align: center; padding: 24px 0; color: var(--text-muted); font-size: 13px;">No insights generated.</p>'
+    `<p style="text-align: center; padding: 24px 0; color: var(--text-muted); font-size: 13px;">${t('insight.noInsights')}</p>`
   );
 }
 

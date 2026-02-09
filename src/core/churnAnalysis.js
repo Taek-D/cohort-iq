@@ -1,5 +1,6 @@
 // churnAnalysis.js - Churn 위험 세그먼트 식별 엔진
 import { differenceInWeeks } from 'date-fns';
+import { t } from '../i18n/index.js';
 
 // 스코어링 가중치 (총 100점)
 // 근거: docs/METHODOLOGY.md 2-2절 참조
@@ -223,9 +224,9 @@ export function generateInsights(riskSegments) {
         insights.push({
             type: 'ALERT',
             severity: 'CRITICAL',
-            title: `즉시 조치 필요: ${summary.critical}명의 사용자가 이탈 위험`,
-            description: `전체 사용자의 ${summary.criticalPercentage}%가 높은 이탈 위험 상태입니다.`,
-            action: '재참여 캠페인 (이메일, 푸시 알림) 즉시 실행을 권장합니다.',
+            title: t('insight.criticalTitle', { count: summary.critical }),
+            description: t('insight.criticalDesc', { pct: summary.criticalPercentage }),
+            action: t('insight.criticalAction'),
             affectedUsers: summary.critical
         });
     }
@@ -235,9 +236,9 @@ export function generateInsights(riskSegments) {
         insights.push({
             type: 'WARNING',
             severity: 'HIGH',
-            title: `${summary.high}명의 사용자가 이탈 가능성 높음`,
-            description: `${summary.highPercentage}%의 사용자가 활동이 감소하고 있습니다.`,
-            action: '타겟 프로모션 또는 기능 추천을 통해 재참여를 유도하세요.',
+            title: t('insight.highTitle', { count: summary.high }),
+            description: t('insight.highDesc', { pct: summary.highPercentage }),
+            action: t('insight.highAction'),
             affectedUsers: summary.high
         });
     }
@@ -248,18 +249,18 @@ export function generateInsights(riskSegments) {
         insights.push({
             type: 'ALERT',
             severity: 'HIGH',
-            title: '전체 사용자 건강도 낮음',
-            description: `${100 - healthyPercentage}%의 사용자가 위험 상태입니다.`,
-            action: '제품 경험 개선 및 온보딩 프로세스 점검이 필요합니다.',
+            title: t('insight.healthLowTitle'),
+            description: t('insight.healthLowDesc', { pct: 100 - healthyPercentage }),
+            action: t('insight.healthLowAction'),
             affectedUsers: summary.critical + summary.high
         });
     } else if (healthyPercentage >= 80) {
         insights.push({
             type: 'SUCCESS',
             severity: 'LOW',
-            title: '사용자 건강도 양호',
-            description: `${healthyPercentage}%의 사용자가 건강한 활동 패턴을 보입니다.`,
-            action: '현재 전략을 유지하면서 Medium 위험 사용자에 집중하세요.',
+            title: t('insight.healthGoodTitle'),
+            description: t('insight.healthGoodDesc', { pct: healthyPercentage }),
+            action: t('insight.healthGoodAction'),
             affectedUsers: summary.low
         });
     }
@@ -291,9 +292,9 @@ export function generateInsights(riskSegments) {
         insights.push({
             type: 'WARNING',
             severity: 'MEDIUM',
-            title: `${worstCohort.cohort} 코호트 집중 관리 필요`,
-            description: `해당 코호트의 ${Math.round(worstCohort.riskRate)}%가 위험 상태입니다.`,
-            action: '이 코호트의 온보딩 경험을 재검토하고 개선하세요.',
+            title: t('insight.worstCohortTitle', { cohort: worstCohort.cohort }),
+            description: t('insight.worstCohortDesc', { pct: Math.round(worstCohort.riskRate) }),
+            action: t('insight.worstCohortAction'),
             affectedUsers: worstCohort.stats.critical + worstCohort.stats.high
         });
     }

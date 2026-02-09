@@ -1,5 +1,6 @@
 // ltvVisualization.js — LTV 시각화 (Chart.js)
 import { Chart } from 'chart.js/auto';
+import { t } from '../i18n/index.js';
 
 const tooltip = {
   backgroundColor: '#111827',
@@ -39,14 +40,14 @@ export function renderLTVBarChart(canvas, cohortLTVs) {
       labels,
       datasets: [
         {
-          label: 'Observed LTV',
+          label: t('chart.observedLtv'),
           data: cohortLTVs.map((c) => c.observedLTV),
           backgroundColor: OBSERVED_COLOR,
           borderRadius: 4,
           barPercentage: 0.6,
         },
         {
-          label: 'Projected LTV',
+          label: t('chart.projectedLtv'),
           data: cohortLTVs.map((c) => c.projectedLTV),
           backgroundColor: PROJECTED_COLOR,
           borderColor: 'rgba(37, 99, 235, 0.50)',
@@ -81,9 +82,9 @@ export function renderLTVBarChart(canvas, cohortLTVs) {
               const idx = items[0].dataIndex;
               const c = cohortLTVs[idx];
               return [
-                `Confidence: ${c.confidence}`,
-                `Observed: ${c.observedWeeks}w / Total: ${c.totalWeeks}w`,
-                `Cohort size: ${c.cohortSize}`,
+                `${t('chart.confidence')}: ${c.confidence}`,
+                `${t('chart.observedWeeks')}: ${c.observedWeeks}w / ${t('chart.totalWeeks')}: ${c.totalWeeks}w`,
+                `${t('chart.cohortSize')}: ${c.cohortSize}`,
               ];
             },
           },
@@ -106,7 +107,7 @@ export function renderLTVBarChart(canvas, cohortLTVs) {
           },
           title: {
             display: true,
-            text: 'LTV',
+            text: t('chart.ltv'),
             color: '#6b7280',
             font: { size: 11 },
           },
@@ -132,7 +133,7 @@ export function renderLTVTrendChart(canvas, cohortLTVs) {
       labels,
       datasets: [
         {
-          label: 'Observed LTV',
+          label: t('chart.observedLtv'),
           data: cohortLTVs.map((c) => c.observedLTV),
           borderColor: TREND_SOLID,
           backgroundColor: 'rgba(37, 99, 235, 0.08)',
@@ -143,7 +144,7 @@ export function renderLTVTrendChart(canvas, cohortLTVs) {
           borderWidth: 2,
         },
         {
-          label: 'Projected LTV',
+          label: t('chart.projectedLtv'),
           data: cohortLTVs.map((c) => c.projectedLTV),
           borderColor: TREND_DASHED,
           borderDash: [6, 3],
@@ -192,7 +193,7 @@ export function renderLTVTrendChart(canvas, cohortLTVs) {
           },
           title: {
             display: true,
-            text: 'LTV',
+            text: t('chart.ltv'),
             color: '#6b7280',
             font: { size: 11 },
           },
@@ -210,13 +211,13 @@ export function renderLTVTrendChart(canvas, cohortLTVs) {
  */
 export function renderLTVComparisonTable(cohortLTVs, summary) {
   if (!cohortLTVs || cohortLTVs.length === 0) {
-    return '<p class="empty-msg">No LTV data available.</p>';
+    return `<p class="empty-msg">${t('ltv.noData')}</p>`;
   }
 
-  const trendLabel = {
-    improving: '↑ Improving',
-    declining: '↓ Declining',
-    stable: '→ Stable',
+  const trendLabelMap = {
+    improving: t('ltv.improving'),
+    declining: t('ltv.declining'),
+    stable: t('ltv.stable'),
   };
   const trendClass = {
     improving: 'trend-up',
@@ -232,9 +233,9 @@ export function renderLTVComparisonTable(cohortLTVs, summary) {
       const isWorst =
         summary.worstCohort && c.cohort === summary.worstCohort.cohort;
       const tag = isBest
-        ? '<span class="ltv-tag best">Best</span>'
+        ? `<span class="ltv-tag best">${t('ltv.best')}</span>`
         : isWorst
-          ? '<span class="ltv-tag worst">Worst</span>'
+          ? `<span class="ltv-tag worst">${t('ltv.worst')}</span>`
           : '';
 
       return `<tr>
@@ -250,20 +251,20 @@ export function renderLTVComparisonTable(cohortLTVs, summary) {
 
   return `
     <div class="ltv-summary-bar">
-      <span>Avg LTV: <strong>${summary.averageLTV.toFixed(2)}</strong></span>
-      <span>Median: <strong>${summary.medianLTV.toFixed(2)}</strong></span>
-      <span>Revenue: <strong>${summary.totalProjectedRevenue.toFixed(0)}</strong></span>
-      <span class="${trendClass[summary.ltvTrend]}">${trendLabel[summary.ltvTrend]}</span>
+      <span>${t('ltv.avgLtv')}: <strong>${summary.averageLTV.toFixed(2)}</strong></span>
+      <span>${t('ltv.median')}: <strong>${summary.medianLTV.toFixed(2)}</strong></span>
+      <span>${t('ltv.revenue')}: <strong>${summary.totalProjectedRevenue.toFixed(0)}</strong></span>
+      <span class="${trendClass[summary.ltvTrend]}">${trendLabelMap[summary.ltvTrend]}</span>
     </div>
     <table class="ltv-table">
       <thead>
         <tr>
-          <th>Cohort</th>
-          <th>Size</th>
-          <th>Observed</th>
-          <th>Projected</th>
-          <th>Weeks</th>
-          <th>Conf.</th>
+          <th>${t('table.cohort')}</th>
+          <th>${t('table.size')}</th>
+          <th>${t('table.observed')}</th>
+          <th>${t('table.projected')}</th>
+          <th>${t('table.weeks')}</th>
+          <th>${t('table.conf')}</th>
         </tr>
       </thead>
       <tbody>${rows}</tbody>

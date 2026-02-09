@@ -1,4 +1,5 @@
 // ui/helpers.js — main.js에서 추출한 순수 함수 (테스트 가능)
+import { t } from '../i18n/index.js';
 
 /**
  * CSV 파일 여부 검증
@@ -7,10 +8,10 @@
  */
 export function validateCSVFile(file) {
   if (!file) {
-    return { valid: false, error: 'CSV 파일만 업로드 가능합니다.' };
+    return { valid: false, error: t('validation.csvOnly') };
   }
   if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
-    return { valid: false, error: 'CSV 파일만 업로드 가능합니다.' };
+    return { valid: false, error: t('validation.csvOnly') };
   }
   return { valid: true };
 }
@@ -40,9 +41,10 @@ export function formatValidationErrorsHTML(errors) {
     .slice(0, 3)
     .map((e) => `<li>${e}</li>`)
     .join('');
-  const extra = errors.length > 3 ? `<li>외 ${errors.length - 3}건</li>` : '';
+  const extra =
+    errors.length > 3 ? `<li>${t('validation.andMore', { count: errors.length - 3 })}</li>` : '';
   return `<div class="status-msg status-error" style="flex-direction: column; align-items: flex-start; gap: 4px; margin-top: 8px;">
-      <strong style="font-size: 13px;">데이터 오류</strong>
+      <strong style="font-size: 13px;">${t('validation.dataError')}</strong>
       <ul style="font-size: 12px; list-style: disc; padding-left: 16px; opacity: 0.85;">
         ${list}${extra}
       </ul>
@@ -61,9 +63,11 @@ export function formatValidationWarningsHTML(warnings) {
     .map((w) => `<li>${w}</li>`)
     .join('');
   const extra =
-    warnings.length > 3 ? `<li>외 ${warnings.length - 3}건</li>` : '';
+    warnings.length > 3
+      ? `<li>${t('validation.andMore', { count: warnings.length - 3 })}</li>`
+      : '';
   return `<div class="status-msg" style="background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); flex-direction: column; align-items: flex-start; gap: 4px; margin-top: 8px;">
-      <strong style="font-size: 13px;">데이터 경고</strong>
+      <strong style="font-size: 13px;">${t('validation.dataWarning')}</strong>
       <ul style="font-size: 12px; list-style: disc; padding-left: 16px; opacity: 0.85;">
         ${list}${extra}
       </ul>

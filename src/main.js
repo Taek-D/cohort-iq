@@ -33,6 +33,7 @@ import {
   extractDisplayStats,
 } from './ui/helpers.js';
 import { createAppLayout } from './ui/appLayout.js';
+import { t, setLocale } from './i18n/index.js';
 
 // ─── State ───
 
@@ -53,66 +54,124 @@ analysisWorker.onmessage = (e) => {
   if (type === 'SUCCESS') {
     handleAnalysisSuccess(payload.cohortResult, payload.churnResult, payload.ltvResult);
   } else if (type === 'ERROR') {
-    showStatus(`분석 중 오류가 발생했습니다: ${error}`, 'error');
+    showStatus(t('status.analysisError', { error }), 'error');
   }
 };
 
 analysisWorker.onerror = () => {
-  showStatus('분석 워커에서 심각한 오류가 발생했습니다.', 'error');
+  showStatus(t('status.workerError'), 'error');
 };
 
 // ─── UI ───
 
-document.querySelector('#app').innerHTML = createAppLayout();
+function initUI() {
+  document.querySelector('#app').innerHTML = createAppLayout();
+  bindEventListeners();
+}
+
+initUI();
 
 // Global Error Handler
 window.onerror = function (message) {
-  showStatus(`시스템 오류 발생: ${message}`, 'error');
+  showStatus(t('status.systemError', { message }), 'error');
   return false;
 };
 
-// ─── DOM ───
+// ─── Locale Change ───
 
-const dropZone = document.getElementById('dropZone');
-const fileInput = document.getElementById('csvUpload');
-const loadSampleBtn = document.getElementById('loadSample');
+window.addEventListener('locale-change', () => {
+  const hadResults = !document.getElementById('resultsArea')?.classList.contains('hidden');
+  initUI();
 
-// ─── Event Listeners ───
+  if (hadResults && analysisResults.cohort) {
+    const resultsArea = document.getElementById('resultsArea');
+    resultsArea.classList.remove('hidden');
 
-dropZone.addEventListener('dragover', (e) => {
-  e.preventDefault();
-  dropZone.classList.add('drag-active');
+    const stats = extractDisplayStats(analysisResults.cohort, analysisResults.churn);
+    document.getElementById('statCohorts').textContent = stats.cohorts;
+    document.getElementById('statUsers').textContent = stats.users;
+    document.getElementById('statDataPoints').textContent = stats.dataPoints;
+    document.getElementById('statDuration').textContent = stats.duration;
+
+    churnRendered = false;
+    ltvRendered = false;
+
+    charts.heatmap = renderRetentionHeatmap(
+      document.getElementById('heatmapChart'),
+      analysisResults.cohort.heatmapData
+    );
+    charts.trend = renderRetentionTrend(
+      document.getElementById('trendChart'),
+      analysisResults.cohort.retentionMatrix
+    );
+
+    const reportBtn = document.getElementById('generateReportBtn');
+    reportBtn.addEventListener('click', () => generateAndShowReport());
+
+    showStatus(t('status.analysisComplete'), 'success');
+  }
 });
 
-dropZone.addEventListener('dragleave', () => {
-  dropZone.classList.remove('drag-active');
-});
+// ─── Event Binding ───
 
-dropZone.addEventListener('drop', (e) => {
-  e.preventDefault();
-  dropZone.classList.remove('drag-active');
-  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
-});
+function bindEventListeners() {
+  const dropZone = document.getElementById('dropZone');
+  const fileInput = document.getElementById('csvUpload');
+  const loadSampleBtn = document.getElementById('loadSample');
 
-fileInput.addEventListener('change', (e) => {
-  if (e.target.files.length) handleFile(e.target.files[0]);
-});
+  dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('drag-active');
+  });
 
-loadSampleBtn.addEventListener('click', () => {
-  loadSampleData();
-});
+  dropZone.addEventListener('dragleave', () => {
+    dropZone.classList.remove('drag-active');
+  });
 
-// Tab switching
-document.querySelectorAll('.tab-btn').forEach((btn) => {
-  btn.addEventListener('click', () => switchToTab(btn.dataset.tab));
-});
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-active');
+    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+  });
+
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files.length) handleFile(e.target.files[0]);
+  });
+
+  loadSampleBtn.addEventListener('click', () => {
+    loadSampleData();
+  });
+
+  // Tab switching
+  document.querySelectorAll('.tab-btn').forEach((btn) => {
+    btn.addEventListener('click', () => switchToTab(btn.dataset.tab));
+  });
+
+  // Language toggle
+  document.getElementById('langToggle').addEventListener('click', (e) => {
+    const lang = e.target.dataset?.lang;
+    if (lang) setLocale(lang);
+  });
+
+  // LTV Recalculate
+  document.getElementById('recalcLTV').addEventListener('click', () => {
+    if (!analysisResults.cohort) return;
+    const arpu = parseFloat(document.getElementById('arpuInput').value) || 1;
+    analysisResults.ltv = predictLTV(
+      analysisResults.cohort.retentionMatrix,
+      { arpu }
+    );
+    ltvRendered = false;
+    renderLTVVisuals();
+  });
+}
 
 // ─── Tabs ───
 
 function switchToTab(tabName) {
   document
     .querySelectorAll('.tab-btn')
-    .forEach((t) => t.classList.toggle('active', t.dataset.tab === tabName));
+    .forEach((tb) => tb.classList.toggle('active', tb.dataset.tab === tabName));
   document
     .querySelectorAll('.tab-panel')
     .forEach((p) =>
@@ -174,19 +233,6 @@ function renderLTVVisuals() {
   ltvRendered = true;
 }
 
-// LTV Recalculate
-document.getElementById('recalcLTV').addEventListener('click', () => {
-  if (!analysisResults.cohort) return;
-
-  const arpu = parseFloat(document.getElementById('arpuInput').value) || 1;
-  analysisResults.ltv = predictLTV(
-    analysisResults.cohort.retentionMatrix,
-    { arpu }
-  );
-  ltvRendered = false;
-  renderLTVVisuals();
-});
-
 // ─── File Processing ───
 
 function handleFile(file) {
@@ -195,22 +241,22 @@ function handleFile(file) {
     showStatus(check.error, 'error');
     return;
   }
-  showStatus('파일 읽는 중...', 'loading');
+  showStatus(t('status.readingFile'), 'loading');
   const reader = new FileReader();
   reader.onload = (e) => processCSV(e.target.result);
-  reader.onerror = () => showStatus('파일 읽기 실패', 'error');
+  reader.onerror = () => showStatus(t('status.readFailed'), 'error');
   reader.readAsText(file);
 }
 
 async function loadSampleData() {
   try {
-    showStatus('샘플 데이터 로딩 중...', 'loading');
+    showStatus(t('status.loadingSample'), 'loading');
     const response = await fetch('/sample_cohort_data.csv');
-    if (!response.ok) throw new Error('샘플 데이터를 불러올 수 없습니다.');
+    if (!response.ok) throw new Error(t('status.sampleLoadFailed'));
     const csvText = await response.text();
     processCSV(csvText);
   } catch (error) {
-    showStatus(`오류: ${error.message}`, 'error');
+    showStatus(error.message, 'error');
   }
 }
 
@@ -241,26 +287,26 @@ function processCSV(csvText) {
 
       if (!validation.valid || validation.data.length === 0) {
         if (validation.errors.length === 0 && !hasError) {
-          showStatus(
-            '유효한 데이터가 없습니다. CSV 파일을 확인해주세요.',
-            'error'
-          );
+          showStatus(t('status.noValidData'), 'error');
         }
         return;
       }
 
-      const uniqueUsers = validation.stats?.uniqueUsers
-        ? ` (사용자: ${validation.stats.uniqueUsers}명)`
+      const usersSuffix = validation.stats?.uniqueUsers
+        ? t('status.usersSuffix', { count: validation.stats.uniqueUsers })
         : '';
       showStatus(
-        `데이터 검증 완료 — 유효: ${validation.stats.valid.toLocaleString()}행${uniqueUsers}`,
+        t('status.validationComplete', {
+          valid: validation.stats.valid.toLocaleString(),
+          users: usersSuffix,
+        }),
         'success'
       );
 
       setTimeout(() => analyzeAndVisualize(validation.data), 100);
     },
     error: (error) => {
-      showStatus(`CSV 파싱 오류: ${error.message}`, 'error');
+      showStatus(t('status.csvParseError', { message: error.message }), 'error');
     },
   });
 }
@@ -268,7 +314,7 @@ function processCSV(csvText) {
 // ─── Analysis ───
 
 function analyzeAndVisualize(validatedData) {
-  showStatus('분석 중...', 'loading');
+  showStatus(t('status.analyzing'), 'loading');
   analysisWorker.postMessage({ type: 'ANALYZE', data: validatedData });
 }
 
@@ -317,13 +363,13 @@ function handleAnalysisSuccess(cohortResult, churnResult, ltvResult) {
     reportBtn.parentNode.replaceChild(newBtn, reportBtn);
     newBtn.addEventListener('click', () => generateAndShowReport());
 
-    showStatus('분석 완료', 'success');
+    showStatus(t('status.analysisComplete'), 'success');
 
     setTimeout(() => {
       resultsArea.scrollIntoView({ behavior: 'smooth' });
     }, 100);
   } catch (error) {
-    showStatus(`렌더링 오류: ${error.message}`, 'error');
+    showStatus(t('status.renderError', { message: error.message }), 'error');
   }
 }
 
@@ -331,13 +377,13 @@ function handleAnalysisSuccess(cohortResult, churnResult, ltvResult) {
 
 async function generateAndShowReport() {
   if (!analysisResults.cohort || !analysisResults.churn) {
-    showStatus('분석 결과가 없습니다.', 'error');
+    showStatus(t('status.noAnalysisResult'), 'error');
     return;
   }
 
   const btn = document.getElementById('generateReportBtn');
   const originalHTML = btn.innerHTML;
-  btn.textContent = 'Generating...';
+  btn.textContent = t('status.generating');
   btn.disabled = true;
 
   try {
@@ -349,7 +395,7 @@ async function generateAndShowReport() {
     const htmlContent = generateSummaryHTML(summaryData);
     showPDFPreview(htmlContent);
   } catch (error) {
-    showStatus('리포트 생성 오류: ' + error.message, 'error');
+    showStatus(t('status.reportError', { message: error.message }), 'error');
   } finally {
     btn.innerHTML = originalHTML;
     btn.disabled = false;

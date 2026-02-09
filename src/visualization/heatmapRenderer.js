@@ -1,6 +1,7 @@
 // heatmapRenderer.js — Chart.js Retention Heatmap & Trend
 import { Chart } from 'chart.js/auto';
 import { MatrixController, MatrixElement } from 'chartjs-chart-matrix';
+import { t } from '../i18n/index.js';
 
 Chart.register(MatrixController, MatrixElement);
 
@@ -44,7 +45,7 @@ export function renderRetentionHeatmap(canvas, heatmapData) {
     data: {
       datasets: [
         {
-          label: 'Retention %',
+          label: t('chart.retentionPct'),
           data: heatmapData.data,
           backgroundColor: (context) => {
             const value = context.raw?.v || 0;
@@ -74,13 +75,13 @@ export function renderRetentionHeatmap(canvas, heatmapData) {
           callbacks: {
             title: (context) => {
               const data = context[0].raw;
-              return `${heatmapData.cohortList[data.y]} — Week ${data.x}`;
+              return `${heatmapData.cohortList[data.y]} — ${t('chart.week')} ${data.x}`;
             },
             label: (context) => {
               const data = context.raw;
               return [
-                `Retention: ${data.v.toFixed(1)}%`,
-                `Active: ${data.users} / ${data.total}`,
+                `${t('chart.retention')}: ${data.v.toFixed(1)}%`,
+                `${t('chart.active')}: ${data.users} / ${data.total}`,
               ];
             },
           },
@@ -91,7 +92,7 @@ export function renderRetentionHeatmap(canvas, heatmapData) {
           type: 'linear',
           title: {
             display: true,
-            text: 'Week',
+            text: t('chart.week'),
             color: '#6b7280',
             font: {
               family: "'JetBrains Mono', monospace",
@@ -117,7 +118,7 @@ export function renderRetentionHeatmap(canvas, heatmapData) {
           max: heatmapData.cohortList.length - 0.5,
           title: {
             display: true,
-            text: 'Cohort',
+            text: t('chart.cohort'),
             color: '#6b7280',
             font: {
               family: "'JetBrains Mono', monospace",
@@ -236,7 +237,7 @@ export function renderRetentionTrend(canvas, retentionMatrix) {
           type: 'linear',
           title: {
             display: true,
-            text: 'Week',
+            text: t('chart.week'),
             color: '#6b7280',
             font: {
               family: "'JetBrains Mono', monospace",
@@ -258,7 +259,7 @@ export function renderRetentionTrend(canvas, retentionMatrix) {
         y: {
           title: {
             display: true,
-            text: 'Retention %',
+            text: t('chart.retentionPct'),
             color: '#6b7280',
             font: {
               family: "'JetBrains Mono', monospace",

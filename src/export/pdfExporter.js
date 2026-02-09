@@ -1,4 +1,5 @@
 // pdfExporter.js - PDF Export (html2canvas-pro: oklch 지원)
+import { t } from '../i18n/index.js';
 
 /**
  * HTML을 PDF로 변환
@@ -85,16 +86,16 @@ export function showPDFPreview(htmlContent) {
     <div class="modal-container">
       <div class="modal-header">
         <h2 style="font-size: 13px; font-weight: 600; color: var(--text-primary);">
-          PDF Preview
+          ${t('pdf.preview')}
         </h2>
         <div style="display: flex; gap: 0.5rem;">
           <button id="downloadPDF" class="btn-primary">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
             </svg>
-            Download PDF
+            ${t('pdf.download')}
           </button>
-          <button id="closePreview" class="btn-ghost">Close</button>
+          <button id="closePreview" class="btn-ghost">${t('pdf.close')}</button>
         </div>
       </div>
       <div class="modal-body">
@@ -116,12 +117,12 @@ export function showPDFPreview(htmlContent) {
     .addEventListener('click', async () => {
       const downloadBtn = document.getElementById('downloadPDF');
       const originalHTML = downloadBtn.innerHTML;
-      downloadBtn.textContent = '생성 중...';
+      downloadBtn.textContent = t('pdf.generating');
       downloadBtn.disabled = true;
 
       try {
         await exportToPDF(htmlContent);
-        downloadBtn.textContent = '완료!';
+        downloadBtn.textContent = t('pdf.done');
         downloadBtn.style.background = 'var(--green)';
         downloadBtn.style.color = '#ffffff';
         setTimeout(() => {
@@ -131,7 +132,7 @@ export function showPDFPreview(htmlContent) {
           downloadBtn.style.color = '';
         }, 2000);
       } catch {
-        downloadBtn.textContent = '오류 발생';
+        downloadBtn.textContent = t('pdf.error');
         downloadBtn.style.background = 'var(--red)';
         downloadBtn.style.color = '#fff';
         setTimeout(() => {
