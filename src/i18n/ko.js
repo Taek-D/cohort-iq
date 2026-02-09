@@ -36,7 +36,7 @@ export default {
   'ltv.recalculate': '\uc7ac\uacc4\uc0b0',
 
   // Chart labels
-  'chart.retentionPct': '\ub9ac\ud150\uc158\uc728 %',
+  'chart.retentionPct': '\ub9ac\ud150\uc158\uc728',
   'chart.week': '\uc8fc\ucc28',
   'chart.cohort': '\ucf54\ud638\ud2b8',
   'chart.retention': '\ub9ac\ud150\uc158',
@@ -47,13 +47,13 @@ export default {
   'chart.confidence': '\uc2e0\ub8b0\ub3c4',
   'chart.observedWeeks': '\uad00\uce21',
   'chart.totalWeeks': '\uc804\uccb4',
-  'chart.cohortSize': '\ucf54\ud638\ud2b8 \ud06c\uae30',
+  'chart.cohortSize': '\ucf54\ud638\ud2b8 \uc778\uc6d0',
 
   // Risk chart labels
-  'chart.critical': 'Critical',
-  'chart.high': 'High',
-  'chart.medium': 'Medium',
-  'chart.low': 'Low',
+  'chart.critical': '\uc2ec\uac01',
+  'chart.high': '\ub192\uc74c',
+  'chart.medium': '\ubcf4\ud1b5',
+  'chart.low': '\ub0ae\uc74c',
   'chart.users': '\uba85',
 
   // Table headers
@@ -63,7 +63,7 @@ export default {
   'table.score': '\uc810\uc218',
   'table.lastActive': '\ub9c8\uc9c0\ub9c9 \ud65c\ub3d9',
   'table.activity': '\ud65c\ub3d9\ub960',
-  'table.size': '\ud06c\uae30',
+  'table.size': '\uc778\uc6d0',
   'table.observed': '\uad00\uce21',
   'table.projected': '\uc608\uce21',
   'table.weeks': '\uc8fc\ucc28',
@@ -72,10 +72,10 @@ export default {
   // LTV summary bar
   'ltv.avgLtv': '\ud3c9\uade0 LTV',
   'ltv.median': '\uc911\uc559\uac12',
-  'ltv.revenue': '\ub9e4\ucd9c',
-  'ltv.improving': '\u2191 \uac1c\uc120',
+  'ltv.revenue': '\uc608\uc0c1 \ub9e4\ucd9c',
+  'ltv.improving': '\u2191 \uc0c1\uc2b9',
   'ltv.declining': '\u2193 \ud558\ub77d',
-  'ltv.stable': '\u2192 \uc548\uc815',
+  'ltv.stable': '\u2192 \uc720\uc9c0',
   'ltv.best': '\ucd5c\uace0',
   'ltv.worst': '\ucd5c\uc800',
   'ltv.noData': 'LTV \ub370\uc774\ud130\uac00 \uc5c6\uc2b5\ub2c8\ub2e4.',
@@ -140,7 +140,7 @@ export default {
   'insight.criticalTitle':
     '\uc989\uc2dc \uc870\uce58 \ud544\uc694: {{count}}\uba85\uc758 \uc0ac\uc6a9\uc790\uac00 \uc774\ud0c8 \uc704\ud5d8',
   'insight.criticalDesc':
-    '\uc804\uccb4 \uc0ac\uc6a9\uc790\uc758 {{pct}}%\uac00 \ub192\uc740 \uc774\ud0c8 \uc704\ud5d8 \uc0c1\ud0dc\uc785\ub2c8\ub2e4.',
+    '\uc804\uccb4 \uc0ac\uc6a9\uc790\uc758 {{pct}}%\uac00 \uc2ec\uac01\ud55c \uc774\ud0c8 \uc704\ud5d8 \uc0c1\ud0dc\uc785\ub2c8\ub2e4.',
   'insight.criticalAction':
     '\uc7ac\ucc38\uc5ec \uce94\ud398\uc778 (\uc774\uba54\uc77c, \ud478\uc2dc \uc54c\ub9bc) \uc989\uc2dc \uc2e4\ud589\uc744 \uad8c\uc7a5\ud569\ub2c8\ub2e4.',
   'insight.highTitle':
@@ -168,18 +168,18 @@ export default {
 
   // Summary / PDF
   'summary.title': 'Executive Summary',
-  'summary.subtitle': '\ucf54\ud638\ud2b8 \ub9ac\ud150\uc158 & Churn \ubd84\uc11d \ub9ac\ud3ec\ud2b8',
+  'summary.subtitle': '\ucf54\ud638\ud2b8 \ub9ac\ud150\uc158 & \uc774\ud0c8 \ubd84\uc11d \ub9ac\ud3ec\ud2b8',
   'summary.generatedAt': '\uc0dd\uc131\uc77c: {{date}}',
   'summary.analysisPeriod': '\ubd84\uc11d \uae30\uac04',
   'summary.totalCohorts': '\ucd1d \ucf54\ud638\ud2b8',
   'summary.startDate': '\uc2dc\uc791\uc77c',
   'summary.endDate': '\uc885\ub8cc\uc77c',
   'summary.overallHealth': '\uc804\uccb4 \uac74\uac15\ub3c4',
-  'summary.grade': '{{grade}}\ub4f1\uae09',
+  'summary.grade': '{{grade}} \ub4f1\uae09',
   'summary.retentionTrend': '\ub9ac\ud150\uc158 \ucd94\uc774',
-  'summary.churnRisk': 'Churn \uc704\ud5d8',
-  'summary.criticalRisk': 'Critical Risk',
-  'summary.highRisk': 'High Risk',
+  'summary.churnRisk': '\uc774\ud0c8 \uc704\ud5d8',
+  'summary.criticalRisk': '\uc2ec\uac01 \uc704\ud5d8',
+  'summary.highRisk': '\ub192\uc740 \uc704\ud5d8',
   'summary.persons': '{{count}}\uba85',
   'summary.ltvPrediction': 'LTV \uc608\uce21',
   'summary.avgLtv': '\ud3c9\uade0 LTV',
@@ -188,7 +188,7 @@ export default {
   'summary.keyInsights': '\uc8fc\uc694 \uc778\uc0ac\uc774\ud2b8 & \uc2e4\ud589 \uc870\uce58',
   'summary.recommendedAction': '\ucd94\ucc9c \uc870\uce58: {{action}}',
   'summary.affected': '\uc601\ud5a5: {{count}}\uba85',
-  'summary.footer': 'Analysis Time: {{duration}}ms',
+  'summary.footer': '\ubd84\uc11d \uc18c\uc694 \uc2dc\uac04: {{duration}}ms',
   'summary.gradeA': '\uc6b0\uc218',
   'summary.gradeB': '\uc591\ud638',
   'summary.gradeC': '\uc8fc\uc758',
