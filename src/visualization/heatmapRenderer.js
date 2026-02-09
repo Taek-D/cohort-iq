@@ -110,8 +110,10 @@ export function renderRetentionHeatmap(canvas, heatmapData) {
           grid: { display: false },
         },
         y: {
-          type: 'category',
-          labels: heatmapData.cohortList,
+          type: 'linear',
+          reverse: true,
+          min: -0.5,
+          max: heatmapData.cohortList.length - 0.5,
           title: {
             display: true,
             text: 'Cohort',
@@ -123,9 +125,10 @@ export function renderRetentionHeatmap(canvas, heatmapData) {
             },
           },
           ticks: {
-            callback: (value, index) => {
-              const date = heatmapData.cohortList[index];
-              return date ? date.substring(5) : value;
+            stepSize: 1,
+            callback: (value) => {
+              const date = heatmapData.cohortList[value];
+              return date ? date.substring(5) : '';
             },
             color: '#64748b',
             font: {
