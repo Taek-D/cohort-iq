@@ -79,58 +79,70 @@ export async function exportToPDF(
  * @param {string} htmlContent - HTML 문자열
  */
 export function showPDFPreview(htmlContent) {
-  // 모달 생성
   const modal = document.createElement('div');
-  modal.className =
-    'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+  modal.className = 'modal-overlay';
   modal.innerHTML = `
-    <div class="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-auto">
-      <div class="sticky top-0 bg-white border-b p-4 flex justify-between items-center">
-        <h2 class="text-xl font-bold text-gray-800">📄 PDF 미리보기</h2>
-        <div class="flex gap-2">
-          <button id="downloadPDF" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
-            💾 PDF 다운로드
+    <div class="modal-container">
+      <div class="modal-header">
+        <h2 style="font-size: 0.875rem; font-weight: 600; color: var(--text-primary); font-family: var(--font-display);">
+          PDF Preview
+        </h2>
+        <div style="display: flex; gap: 0.5rem;">
+          <button id="downloadPDF" class="btn-primary">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+            Download PDF
           </button>
-          <button id="closePreview" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition">
-            ✕ 닫기
-          </button>
+          <button id="closePreview" class="btn-ghost">Close</button>
         </div>
       </div>
-      <div class="p-8">
-        ${htmlContent}
+      <div class="modal-body">
+        <div class="modal-paper">
+          ${htmlContent}
+        </div>
       </div>
     </div>
   `;
 
   document.body.appendChild(modal);
 
-  // 이벤트 리스너
   document.getElementById('closePreview').addEventListener('click', () => {
     document.body.removeChild(modal);
   });
 
-  document.getElementById('downloadPDF').addEventListener('click', async () => {
-    const downloadBtn = document.getElementById('downloadPDF');
-    downloadBtn.textContent = '⏳ 생성 중...';
-    downloadBtn.disabled = true;
+  document
+    .getElementById('downloadPDF')
+    .addEventListener('click', async () => {
+      const downloadBtn = document.getElementById('downloadPDF');
+      const originalHTML = downloadBtn.innerHTML;
+      downloadBtn.textContent = '생성 중...';
+      downloadBtn.disabled = true;
 
-    try {
-      await exportToPDF(htmlContent);
-      downloadBtn.textContent = '✅ 다운로드 완료!';
-      setTimeout(() => {
-        downloadBtn.textContent = '💾 PDF 다운로드';
-        downloadBtn.disabled = false;
-      }, 2000);
-    } catch {
-      downloadBtn.textContent = '❌ 오류 발생';
-      setTimeout(() => {
-        downloadBtn.textContent = '💾 PDF 다운로드';
-        downloadBtn.disabled = false;
-      }, 2000);
-    }
-  });
+      try {
+        await exportToPDF(htmlContent);
+        downloadBtn.textContent = '완료!';
+        downloadBtn.style.background = 'var(--green)';
+        downloadBtn.style.color = '#ffffff';
+        setTimeout(() => {
+          downloadBtn.innerHTML = originalHTML;
+          downloadBtn.disabled = false;
+          downloadBtn.style.background = '';
+          downloadBtn.style.color = '';
+        }, 2000);
+      } catch {
+        downloadBtn.textContent = '오류 발생';
+        downloadBtn.style.background = 'var(--red)';
+        downloadBtn.style.color = '#fff';
+        setTimeout(() => {
+          downloadBtn.innerHTML = originalHTML;
+          downloadBtn.disabled = false;
+          downloadBtn.style.background = '';
+          downloadBtn.style.color = '';
+        }, 2000);
+      }
+    });
 
-  // 모달 외부 클릭 시 닫기
   modal.addEventListener('click', (e) => {
     if (e.target === modal) {
       document.body.removeChild(modal);
