@@ -84,7 +84,7 @@ export function showPDFPreview(htmlContent) {
   modal.innerHTML = `
     <div class="modal-container">
       <div class="modal-header">
-        <h2 style="font-size: 0.875rem; font-weight: 600; color: var(--text-primary); font-family: var(--font-display);">
+        <h2 style="font-size: 13px; font-weight: 600; color: var(--text-primary);">
           PDF Preview
         </h2>
         <div style="display: flex; gap: 0.5rem;">
