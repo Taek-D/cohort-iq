@@ -66,7 +66,7 @@ export default {
   'table.size': '\uc778\uc6d0',
   'table.observed': '\uad00\uce21',
   'table.projected': '\uc608\uce21',
-  'table.weeks': '\uc8fc\ucc28',
+  'table.weeks': '\uae30\uac04(\uc8fc)',
   'table.conf': '\uc2e0\ub8b0\ub3c4',
 
   // LTV summary bar
