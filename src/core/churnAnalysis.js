@@ -1,6 +1,34 @@
 // churnAnalysis.js - Churn 위험 세그먼트 식별 엔진
 import { differenceInWeeks } from 'date-fns';
 
+// 스코어링 가중치 (총 100점)
+// 근거: docs/METHODOLOGY.md 2-2절 참조
+const RECENCY_WEIGHT = 40; // 마지막 활동 경과 — 이탈 예측의 가장 강력한 단일 지표
+const FREQUENCY_WEIGHT = 30; // 활동 밀도 — 제품 가치 인식 수준
+const CONSISTENCY_WEIGHT = 30; // 연속 미활동 — 습관 형성 실패 시그널
+
+// 위험 레벨 경계값
+// 근거: docs/METHODOLOGY.md 2-4절 참조
+const RISK_CRITICAL = 70; // Recency 최대(40) + 1개 지표 최대(30) = 즉시 조치
+const RISK_HIGH = 50; // 2개 이상 지표 중간 위험
+const RISK_MEDIUM = 30; // 1개 지표 경미한 위험
+
+// Recency 임계값 (주 단위)
+const RECENCY_SEVERE = 4; // SaaS 28일 비활동 = 사실상 이탈
+const RECENCY_HIGH = 3;
+const RECENCY_MODERATE = 2;
+const RECENCY_MILD = 1;
+
+// Frequency 임계값 (활동 밀도 %)
+const FREQUENCY_LOW = 25;
+const FREQUENCY_MODERATE = 50;
+const FREQUENCY_HIGH = 75;
+
+// Consistency 임계값 (연속 미활동 주)
+const CONSISTENCY_SEVERE = 4;
+const CONSISTENCY_HIGH = 3;
+const CONSISTENCY_MODERATE = 2;
+
 /**
  * 사용자별 활동 패턴 분석
  * @param {Array} validatedData - 검증된 데이터
@@ -100,30 +128,29 @@ export function calculateChurnRisk(userActivity, currentDate = new Date()) {
         }
 
         // 6. Churn 위험 스코어 계산 (0-100)
-        // 높을수록 위험
         let riskScore = 0;
 
-        // Recency 점수 (0-40점): 최근 활동이 오래될수록 높음
-        if (weeksSinceLastActivity >= 4) riskScore += 40;
-        else if (weeksSinceLastActivity >= 3) riskScore += 30;
-        else if (weeksSinceLastActivity >= 2) riskScore += 20;
-        else if (weeksSinceLastActivity >= 1) riskScore += 10;
+        // Recency 점수 (0-RECENCY_WEIGHT점)
+        if (weeksSinceLastActivity >= RECENCY_SEVERE) riskScore += RECENCY_WEIGHT;
+        else if (weeksSinceLastActivity >= RECENCY_HIGH) riskScore += RECENCY_WEIGHT * 0.75;
+        else if (weeksSinceLastActivity >= RECENCY_MODERATE) riskScore += RECENCY_WEIGHT * 0.5;
+        else if (weeksSinceLastActivity >= RECENCY_MILD) riskScore += RECENCY_WEIGHT * 0.25;
 
-        // Frequency 점수 (0-30점): 활동 밀도가 낮을수록 높음
-        if (activityDensity < 25) riskScore += 30;
-        else if (activityDensity < 50) riskScore += 20;
-        else if (activityDensity < 75) riskScore += 10;
+        // Frequency 점수 (0-FREQUENCY_WEIGHT점)
+        if (activityDensity < FREQUENCY_LOW) riskScore += FREQUENCY_WEIGHT;
+        else if (activityDensity < FREQUENCY_MODERATE) riskScore += FREQUENCY_WEIGHT * 0.67;
+        else if (activityDensity < FREQUENCY_HIGH) riskScore += FREQUENCY_WEIGHT * 0.33;
 
-        // Consecutive Inactivity 점수 (0-30점): 연속 미활동이 길수록 높음
-        if (consecutiveInactiveWeeks >= 4) riskScore += 30;
-        else if (consecutiveInactiveWeeks >= 3) riskScore += 20;
-        else if (consecutiveInactiveWeeks >= 2) riskScore += 10;
+        // Consistency 점수 (0-CONSISTENCY_WEIGHT점)
+        if (consecutiveInactiveWeeks >= CONSISTENCY_SEVERE) riskScore += CONSISTENCY_WEIGHT;
+        else if (consecutiveInactiveWeeks >= CONSISTENCY_HIGH) riskScore += CONSISTENCY_WEIGHT * 0.67;
+        else if (consecutiveInactiveWeeks >= CONSISTENCY_MODERATE) riskScore += CONSISTENCY_WEIGHT * 0.33;
 
         // 7. 위험 레벨 분류
         let riskLevel;
-        if (riskScore >= 70) riskLevel = 'CRITICAL';
-        else if (riskScore >= 50) riskLevel = 'HIGH';
-        else if (riskScore >= 30) riskLevel = 'MEDIUM';
+        if (riskScore >= RISK_CRITICAL) riskLevel = 'CRITICAL';
+        else if (riskScore >= RISK_HIGH) riskLevel = 'HIGH';
+        else if (riskScore >= RISK_MEDIUM) riskLevel = 'MEDIUM';
         else riskLevel = 'LOW';
 
         churnRiskData.push({

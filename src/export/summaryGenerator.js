@@ -101,31 +101,47 @@ function calculateAverageRetention(retentionMatrix, weekIndex) {
     return Math.round(sum / weekData.length);
 }
 
+// 건강도 점수 기준값
+// 근거: docs/METHODOLOGY.md 3-2절 참조
+const RETENTION_BENCHMARK = 80; // SaaS 상위 10% D28 리텐션 → 만점 기준
+const LOW_RISK_BENCHMARK = 60; // 건강한 서비스의 Low Risk 최소 비율 → 만점 기준
+const HEALTH_RETENTION_WEIGHT = 50; // 리텐션 배점
+const HEALTH_CHURN_WEIGHT = 50; // Churn Risk 배점
+
 /**
  * 건강도 점수 계산 (0-100)
- * - Week 4 Retention: 50점
- * - Churn Risk: 50점
+ * - Week 4 Retention: HEALTH_RETENTION_WEIGHT점
+ * - Churn Risk: HEALTH_CHURN_WEIGHT점
  */
 function calculateHealthScore(week4Retention, criticalRatio, riskSummary) {
-    // Retention 점수 (0-50)
-    const retentionScore = Math.min(50, (week4Retention / 80) * 50);
+    const retentionScore = Math.min(
+        HEALTH_RETENTION_WEIGHT,
+        (week4Retention / RETENTION_BENCHMARK) * HEALTH_RETENTION_WEIGHT
+    );
 
-    // Churn Risk 점수 (0-50)
     const lowRatio = riskSummary.total > 0
         ? (riskSummary.low / riskSummary.total) * 100
         : 0;
-    const churnScore = Math.min(50, (lowRatio / 60) * 50);
+    const churnScore = Math.min(
+        HEALTH_CHURN_WEIGHT,
+        (lowRatio / LOW_RISK_BENCHMARK) * HEALTH_CHURN_WEIGHT
+    );
 
     return Math.min(100, Math.max(0, Math.round(retentionScore + churnScore)));
 }
+
+// 건강도 등급 경계값
+const GRADE_A = 80;
+const GRADE_B = 60;
+const GRADE_C = 40;
 
 /**
  * 건강도 등급
  */
 export function getHealthGrade(score) {
-    if (score >= 80) return { grade: 'A', color: '#10b981', label: '우수' };
-    if (score >= 60) return { grade: 'B', color: '#3b82f6', label: '양호' };
-    if (score >= 40) return { grade: 'C', color: '#f59e0b', label: '주의' };
+    if (score >= GRADE_A) return { grade: 'A', color: '#10b981', label: '우수' };
+    if (score >= GRADE_B) return { grade: 'B', color: '#3b82f6', label: '양호' };
+    if (score >= GRADE_C) return { grade: 'C', color: '#f59e0b', label: '주의' };
     return { grade: 'D', color: '#ef4444', label: '위험' };
 }
 

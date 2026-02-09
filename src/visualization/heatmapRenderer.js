@@ -144,14 +144,20 @@ export function renderRetentionTrend(canvas, retentionMatrix) {
         });
     });
 
-    // 색상 팔레트
+    // 색상 팔레트 (최대 12개 코호트 구분 가능)
     const colors = [
         '#3b82f6', // Blue
         '#10b981', // Green
-        '#f59e0b', // Orange
+        '#f59e0b', // Amber
         '#ef4444', // Red
         '#8b5cf6', // Purple
-        '#ec4899'  // Pink
+        '#ec4899', // Pink
+        '#06b6d4', // Cyan
+        '#f97316', // Orange
+        '#14b8a6', // Teal
+        '#6366f1', // Indigo
+        '#a855f7', // Violet
+        '#84cc16', // Lime
     ];
 
     // 데이터셋 생성
@@ -227,12 +233,3 @@ export function renderRetentionTrend(canvas, retentionMatrix) {
     return chart;
 }
 
-/**
- * 기존 차트 파괴
- * @param {Chart} chart - Chart.js 인스턴스
- */
-export function destroyChart(chart) {
-    if (chart) {
-        chart.destroy();
-    }
-}

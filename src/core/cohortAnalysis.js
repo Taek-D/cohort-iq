@@ -46,10 +46,10 @@ export function calculateRetention(validatedData, cohortInfo) {
     // 각 코호트별 리텐션 계산
     cohorts.forEach((users, cohortKey) => {
         const cohortDate = new Date(cohortKey);
-        const weeklyRetention = new Map(); // Week N -> 활성 사용자 수
+        const weeklyRetention = new Map(); // Week N -> Set<user_id>
 
-        // Week 0 초기화 (가입 주)
-        weeklyRetention.set(0, users.size);
+        // Week 0 초기화 (가입 주 — 코호트 전원 활성)
+        weeklyRetention.set(0, new Set(users));
 
         // 각 이벤트를 주차별로 분류
         validatedData.forEach(row => {
@@ -73,15 +73,13 @@ export function calculateRetention(validatedData, cohortInfo) {
             }
         });
 
-        // Set을 사용자 수로 변환 및 리텐션율 계산
+        // 리텐션율 계산
         const cohortSize = users.size;
         const maxWeek = weeklyRetention.size > 0 ? Math.max(...weeklyRetention.keys()) : 0;
 
         for (let week = 0; week <= maxWeek; week++) {
             const activeUsers = weeklyRetention.has(week)
-                ? (typeof weeklyRetention.get(week) === 'number'
-                    ? weeklyRetention.get(week)
-                    : weeklyRetention.get(week).size)
+                ? weeklyRetention.get(week).size
                 : 0;
 
             const retentionRate = cohortSize > 0

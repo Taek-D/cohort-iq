@@ -6,7 +6,7 @@ CSV 파일 업로드만으로 코호트 리텐션을 분석하고, 활동 패턴
 
 [![Live Demo](https://img.shields.io/badge/demo-cohort--iq.vercel.app-blue)](https://cohort-iq.vercel.app)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Tests](https://img.shields.io/badge/tests-14%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-25%20passing-brightgreen)
 
 > **[Live Demo](https://cohort-iq.vercel.app)** - 샘플 데이터로 즉시 체험해보세요
 
@@ -70,7 +70,7 @@ npm run dev
 
 ### 테스트
 ```bash
-npm run test     # 단위 테스트 (14개)
+npm run test     # 단위 테스트 (25개)
 npm run build    # 프로덕션 빌드
 ```
 

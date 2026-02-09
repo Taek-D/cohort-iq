@@ -72,7 +72,7 @@ CohortIQ의 모든 주요 변경사항을 기록합니다.
 |------|------|
 | Core | Vanilla JavaScript (ES6+ Module) |
 | Build | Vite 7 |
-| Test | Vitest (14 tests) |
+| Test | Vitest (25 tests) |
 | Data | PapaParse, date-fns |
 | Visualization | Chart.js + chartjs-chart-matrix |
 | Export | jsPDF, html2canvas-pro |
