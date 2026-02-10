@@ -17,6 +17,28 @@ CSV 파일 업로드만으로 코호트 리텐션을 분석하고, 활동 패턴
 
 ---
 
+## 소개 영상
+
+Remotion(React) 기반으로 제작한 25초 프로덕트 소개 영상입니다.
+
+| 씬 | 시간 | 내용 |
+|----|------|------|
+| Intro | 0-4초 | CohortIQ 로고 + 태그라인 |
+| 문제점 | 4-9초 | 기존 코호트 분석의 한계 (시간/비용/복잡성) |
+| 해결책 | 9-14초 | "세 단계. 단 3초." CSV → 분석 → 인사이트 |
+| 주요 기능 | 14-20초 | 히트맵, 이탈 스코어링, LTV, 통계 검정, A/B 테스트, PDF |
+| Closing | 20-25초 | 무료 · 빠름 · 오픈소스 + URL |
+
+```bash
+# 로컬에서 영상 렌더링
+cd cohort-iq-video
+npm install
+npm run studio   # Remotion Studio에서 미리보기 (localhost:3000)
+npm run render   # MP4 렌더링 → out/CohortIQ-Intro.mp4
+```
+
+---
+
 ## 핵심 질문 & 주요 발견
 
 이 프로젝트는 **"구독 서비스 1,010명의 사용자 데이터에서 무엇을 발견할 수 있는가?"** 에 답합니다.
@@ -164,6 +186,7 @@ Python 노트북(`analysis/cohort_eda.ipynb`)에서는 lifelines, scipy를 사�
 | Performance | Web Worker |
 | Hosting | Vercel |
 | Analysis | Python, pandas, scipy, lifelines |
+| Video | Remotion (React 기반 영상 생성) |
 | Database | PostgreSQL (SQL 쿼리 예시) |
 
 ---
@@ -217,6 +240,12 @@ cohort-iq/
 │   └── requirements.txt          # Python 의존성
 ├── public/
 │   └── sample_cohort_data.csv    # 샘플 데이터 (1,010명, 2,306행, 16코호트)
+├── cohort-iq-video/               # Remotion 소개 영상 프로젝트
+│   ├── src/
+│   │   ├── scenes/                # 5개 씬 컴포넌트 (TSX)
+│   │   ├── CohortIQVideo.tsx      # 메인 컴포지션
+│   │   └── styles.ts              # 공유 색상/타이밍 상수
+│   └── package.json
 ├── index.html
 ├── vite.config.js
 └── package.json
