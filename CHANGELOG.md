@@ -4,6 +4,109 @@ CohortIQ의 모든 주요 변경사항을 기록합니다.
 
 ---
 
+## [1.6.1] - 2026-02-10
+
+### 프로젝트 정리 및 Claude Code 설정 업그레이드
+
+#### Claude Code 설정
+- Status Line 추가 (context%, cost, branch, model)
+- PreToolUse 훅 추가 (파괴적 명령 차단)
+- Notification 훅 추가 (터미널 벨)
+- CLAUDE.md 경량화 (963줄 → 60줄, 상세 → `docs/project-history.md`)
+- Agent/Command/Skill 메타데이터 최신화
+
+#### 정리
+- `UPGRADE-PLAN.md` 삭제 (모든 작업 완료)
+- `.claude/settings.local.json` git 추적 해제 (머신별 경로 포함)
+- 부모 디렉토리 레거시 문서 삭제 (Bridge.md, PRD.md 등)
+- `package.json` 버전 1.1.0 → 1.6.1
+
+---
+
+## [1.6.0] - 2026-02-10
+
+### A/B 테스트 시뮬레이션
+
+#### 새 기능
+- **A/B 테스트 시뮬레이터** — 리텐션 기반 A/B 테스트 설계 도구
+  - 필요 샘플 사이즈 계산 (unpooled two-proportion formula)
+  - 파워 분석 커브 시각화
+  - 몬테카를로 시뮬레이션 (1,000회 반복)
+  - 슬라이더 인터랙션 (<1ms 반응, 메인 스레드)
+
+#### 새 파일
+- `src/core/abTestSimulation.js` — normalCDF, normalPPF, power analysis, simulation
+- `src/visualization/abTestRenderer.js` — retention comparison, power curve, cards, table
+- `src/core/abTestSimulation.test.js` — 22개 테스트
+
+#### 수정
+- `appLayout.js` — A/B 테스트 탭 추가
+- `main.js`, `ko.js`, `en.js`, `style.css` — A/B 탭 연동
+
+---
+
+## [1.5.0] - 2026-02-10
+
+### 통계적 검정
+
+#### 새 기능
+- **Chi-squared 독립성 검정** — 코호트 간 리텐션 독립성 검증
+- **Kaplan-Meier 생존 분석** — 코호트별 생존 확률 추정
+- **Log-Rank 검정** — 코호트 간 생존 곡선 비교 (p-value)
+- 생존 곡선 차트 + 검정 결과 카드 UI
+
+#### 새 파일
+- `src/core/statisticalTests.js` — Chi², KM, Log-Rank (순수 JS, 외부 의존성 없음)
+- `src/visualization/statisticsRenderer.js` — 생존 곡선 차트 + 검정 결과 카드
+- `src/core/statisticalTests.test.js` — 17개 테스트
+
+#### 수정
+- `analysisWorker.js` — 4단계 추가 (통계 검정)
+- 샘플 데이터 확장: 200 → 1,010명, 871 → 2,306행
+
+---
+
+## [1.4.0] - 2026-02-10
+
+### LTV 예측
+
+#### 새 기능
+- **BG/NBD 모델** — 기대 거래 횟수 예측
+- **Gamma-Gamma 모델** — 기대 금전 가치 예측
+- **CLV 계산** — E[transactions] × E[monetary] × margin
+- LTV 분포 차트 + 세그먼트 테이블 UI
+
+#### 새 파일
+- `src/core/ltvPrediction.js` — BG/NBD + Gamma-Gamma 모델
+- `src/visualization/ltvVisualization.js` — LTV 분포 차트 + 세그먼트 카드
+- `src/core/ltvPrediction.test.js` — 18개 테스트
+- `src/ui/helpers.js` + `helpers.test.js` — gamma, beta, incomplete gamma 함수 (20개 테스트)
+
+#### 수정
+- `analysisWorker.js` — 3단계 추가 (LTV 예측)
+
+---
+
+## [1.3.0] - 2026-02-09
+
+### 다국어 지원 (i18n)
+
+#### 새 기능
+- **한국어/영어 전환** — 헤더에 KO|EN 토글 버튼
+- 142개 번역 키 (ko/en)
+- localStorage 기반 언어 설정 저장
+- Web Worker / Node.js 환경에서도 안전한 try/catch 패턴
+
+#### 새 파일
+- `src/i18n/index.js` — i18n 모듈 (setLocale, t, getLocale)
+- `src/i18n/ko.js` — 한국어 번역
+- `src/i18n/en.js` — 영어 번역
+
+#### 수정
+- 모든 UI 모듈에 `t()` 함수 적용 (10개 파일)
+
+---
+
 ## [1.2.0] - 2026-02-09
 
 ### 포트폴리오 품질 감사 및 코드 개선
@@ -115,34 +218,24 @@ CohortIQ의 모든 주요 변경사항을 기록합니다.
 | 분류 | 기술 |
 |------|------|
 | Core | Vanilla JavaScript (ES6+ Module) |
-| Build | Vite 7 |
-| Test | Vitest (25 tests) |
-| Data | PapaParse, date-fns |
-| Visualization | Chart.js + chartjs-chart-matrix |
-| Export | jsPDF, html2canvas-pro |
-| Styling | Tailwind CSS 4 |
-| Performance | Web Worker |
+| Build | Vite 7.2.4 |
+| Test | Vitest 4.0.18 (102 tests, 8 files) |
+| Data | PapaParse 5.5.3, date-fns 4.1.0 |
+| Visualization | Chart.js 4.5.1 + chartjs-chart-matrix 3.0.0 |
+| Export | jsPDF 4.1.0, html2canvas-pro |
+| Styling | Tailwind CSS 4.1.18 |
+| Analysis | Cohort, Churn, LTV (BG/NBD), Stats (Chi²/KM/Log-Rank), A/B Sim |
+| i18n | Korean / English (142 keys) |
+| Performance | Web Worker (4-stage pipeline) |
 | Hosting | Vercel |
 
 ---
 
 ## 향후 계획
 
-### P1: 분석 깊이 강화
-- [x] 스코어링 임계값에 산업 벤치마크 근거 추가 → `docs/METHODOLOGY.md`
-- [ ] 코호트 간 비교 인사이트 — "3주차 코호트가 1주차 대비 리텐션 20%p 하락" 등
-- [x] 통계적 disclaimer 추가 → `docs/METHODOLOGY.md` 4절 "방법론의 한계"
-- [x] 매직넘버를 명명된 상수로 추출 + 근거 주석 추가 → `churnAnalysis.js`, `summaryGenerator.js`
-
-### P2: 테스트 및 문서
-- [x] 엣지케이스 테스트 추가 — 빈 데이터, 단일 사용자, 중복 이벤트
-- [x] METHODOLOGY.md 작성 → `docs/METHODOLOGY.md`
-- [x] CASE_STUDY.md 작성 → `docs/CASE_STUDY.md` (샘플 데이터 200명 분석 사례)
-- [x] Churn 스코어링 경계값 테스트 (30/50/70점 경계) → `churnAnalysis.test.js`
-
-### P3: 기능 확장
+### P1: 기능 확장
 - [ ] Monthly 코호트 그룹화 옵션
 - [ ] 다크 모드 지원
 - [ ] CSV 외 Excel(.xlsx) 파일 지원
 - [ ] 코호트별 드릴다운 (클릭 시 상세 사용자 목록)
-- [ ] 한국어/영어 언어 전환
+- [ ] 코호트 간 비교 인사이트 — "3주차 코호트가 1주차 대비 리텐션 20%p 하락" 등
