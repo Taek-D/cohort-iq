@@ -6,7 +6,7 @@ CSV 파일 업로드만으로 코호트 리텐션을 분석하고, 활동 패턴
 
 [![Live Demo](https://img.shields.io/badge/demo-cohort--iq.vercel.app-blue)](https://cohort-iq.vercel.app)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Tests](https://img.shields.io/badge/tests-80%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-102%20passing-brightgreen)
 ![i18n](https://img.shields.io/badge/i18n-KO%20%7C%20EN-blue)
 
 > **[Live Demo](https://cohort-iq.vercel.app)** - 샘플 데이터(1,010명)로 즉시 체험해보세요
@@ -69,7 +69,7 @@ npm run render   # MP4 렌더링 → out/CohortIQ-Intro.mp4
 
 - **코호트 분석**: 가입일 기준 사용자 그룹화 및 주차별 리텐션 추적
 - **고객 세그먼테이션**: 활동 패턴 기반 이탈 위험 분류 (Recency, Frequency, Consistency)
-- **LTV 예측**: 지수 감쇠 모델(Exponential Decay)을 통한 코호트별 고객 생애 가치 추정
+- **LTV 예측**: BG/NBD + Gamma-Gamma 모델을 통한 코호트별 고객 생애 가치 추정
 - **통계 검정**: Chi-Square 독립성 검정, Kaplan-Meier 생존 분석, Log-Rank Test — 웹앱 내 실시간 수행
 - **비즈니스 메트릭 설계**: 건강도 점수, 리텐션율, Churn Rate, Median Survival 자동 산출
 - **데이터 시각화**: 히트맵, 생존곡선, 트렌드/바/도넛 차트로 패턴 시각화
@@ -99,19 +99,26 @@ npm run render   # MP4 렌더링 → out/CohortIQ-Intro.mp4
 <img src="docs/screenshot-churn.png" alt="Churn 위험 분석" width="720">
 
 ### 3. LTV 예측
-- 지수 감쇠 모델: λ = -ln(R_last / R_prev) / Δt
-- 코호트별 관측 LTV + 예측 LTV 비교 차트
-- 신뢰도(High/Medium/Low) 기반 예측 품질 평가
-- ARPU 조정을 통한 매출 시나리오 분석
+- **BG/NBD 모델**: 기대 거래 횟수 예측 (Buy Till You Die)
+- **Gamma-Gamma 모델**: 기대 금전 가치 예측
+- CLV = E[transactions] × E[monetary] × margin
+- 코호트별 LTV 분포 차트 + 세그먼트 테이블
 
-### 4. Executive Summary PDF
+### 4. A/B 테스트 시뮬레이션
+- 리텐션 기반 A/B 테스트 설계 도구
+- 필요 샘플 사이즈 계산 (unpooled two-proportion formula)
+- 파워 분석 커브 시각화
+- 몬테카를로 시뮬레이션 (1,000회 반복)
+- 슬라이더로 baseline/MDE/alpha/power 실시간 조정
+
+### 5. Executive Summary PDF
 - 건강도 점수 (A/B/C/D 등급)
 - 리텐션 추이 + Churn 위험 + LTV 요약
 - 1-Page PDF 다운로드
 
 <img src="docs/screenshot-summary.png" alt="Executive Summary" width="720">
 
-### 5. 다국어 지원 (i18n)
+### 6. 다국어 지원 (i18n)
 - 한국어(KO) / 영어(EN) 실시간 전환
 - 142개 번역 키, 분석 결과 및 인사이트 포함
 
@@ -135,7 +142,7 @@ npm run dev
 
 ### 테스트
 ```bash
-npm run test     # 단위 테스트 (80개)
+npm run test     # 단위 테스트 (102개)
 npm run build    # 프로덕션 빌드
 ```
 
@@ -165,12 +172,14 @@ U002,2025-01-06,2025-01-06
 
 ## 통계 분석 방법론
 
-| 검정 | 구현 | 목적 |
-|------|------|------|
+| 검정/모델 | 구현 | 목적 |
+|-----------|------|------|
 | **Chi-Square** (χ²) | 순수 JS (불완전 감마함수) | 코호트별 이탈 위험 분포 독립성 |
 | **Kaplan-Meier** | Product-Limit Estimator | 사용자 생존곡선, 중앙 생존시간 |
 | **Log-Rank** | Mantel-Cox 검정 | 초기/후기 코호트 생존곡선 차이 |
-| **LTV 예측** | 지수 감쇠 모델 | 코호트별 고객 생애 가치 추정 |
+| **BG/NBD** | Buy Till You Die 모델 | 기대 거래 횟수 예측 |
+| **Gamma-Gamma** | 조건부 기대값 모델 | 기대 금전 가치 예측 |
+| **A/B 시뮬레이션** | Unpooled two-proportion + Monte Carlo | 샘플 사이즈, 파워 분석 |
 
 웹앱에서 분석 시 자동으로 통계 검정이 수행되며, p-value와 유의성 판단이 함께 표시됩니다.
 
@@ -183,15 +192,16 @@ Python 노트북(`analysis/cohort_eda.ipynb`)에서는 lifelines, scipy를 사�
 | 분류 | 기술 |
 |------|------|
 | Core | Vanilla JavaScript (ES6+ Module) |
-| Build | Vite 7 |
-| Test | Vitest (80 tests) |
-| Data | PapaParse, date-fns |
-| Visualization | Chart.js + chartjs-chart-matrix |
-| Statistics | 순수 JS (Chi-Square, KM, Log-Rank, Gamma functions) |
-| Export | jsPDF, html2canvas-pro |
-| Styling | Tailwind CSS 4 |
+| Build | Vite 7.2.4 |
+| Test | Vitest 4.0.18 (102 tests, 8 files) |
+| Data | PapaParse 5.5.3, date-fns 4.1.0 |
+| Visualization | Chart.js 4.5.1 + chartjs-chart-matrix 3.0.0 |
+| Statistics | 순수 JS (Chi-Square, KM, Log-Rank, BG/NBD, Gamma-Gamma) |
+| A/B Testing | 순수 JS (Power Analysis, Monte Carlo Simulation) |
+| Export | jsPDF 4.1.0, html2canvas-pro |
+| Styling | Tailwind CSS 4.1.18 |
 | i18n | Custom module (KO/EN, 142 keys) |
-| Performance | Web Worker |
+| Performance | Web Worker (4-stage pipeline) |
 | Hosting | Vercel |
 | Analysis | Python, pandas, scipy, lifelines |
 | Video | Remotion (React 기반 영상 생성) |
@@ -220,40 +230,36 @@ cohort-iq/
 │   │   ├── dataValidator.js      # CSV 검증 + 컬럼 자동 매칭
 │   │   ├── cohortAnalysis.js     # 코호트 그룹화 + 리텐션 계산
 │   │   ├── churnAnalysis.js      # 활동 패턴 기반 위험 스코어링
-│   │   ├── ltvPrediction.js      # 지수 감쇠 LTV 예측 모델
+│   │   ├── ltvPrediction.js      # BG/NBD + Gamma-Gamma LTV 예측
 │   │   ├── statisticalTests.js   # Chi-Square, Kaplan-Meier, Log-Rank
-│   │   ├── analysisWorker.js     # Web Worker (분석 오프로딩)
-│   │   └── *.test.js             # 단위 테스트 (80개)
+│   │   ├── abTestSimulation.js   # A/B 테스트 시뮬레이션 + 파워 분석
+│   │   ├── analysisWorker.js     # Web Worker (4-stage 분석 파이프라인)
+│   │   └── *.test.js             # 단위 테스트 (102개, 8파일)
 │   ├── visualization/
 │   │   ├── heatmapRenderer.js    # 히트맵 + 트렌드 차트
 │   │   ├── churnVisualization.js # 위험 도넛 차트 + 테이블
-│   │   ├── ltvVisualization.js   # LTV 바/트렌드 차트 + 비교 테이블
-│   │   └── statisticsRenderer.js # Kaplan-Meier 생존곡선 + 검정 결과 카드
+│   │   ├── ltvVisualization.js   # LTV 분포 차트 + 세그먼트 테이블
+│   │   ├── statisticsRenderer.js # 생존곡선 + 검정 결과 카드
+│   │   └── abTestRenderer.js     # A/B 비교 차트 + 파워 커브
 │   ├── i18n/
 │   │   ├── index.js              # i18n 모듈 (setLocale, t, getLocale)
 │   │   ├── ko.js                 # 한국어 번역 (142+ 키)
 │   │   └── en.js                 # 영어 번역
 │   ├── ui/
 │   │   ├── appLayout.js          # 앱 레이아웃 HTML 템플릿
-│   │   └── helpers.js            # UI 유틸리티 함수
+│   │   └── helpers.js            # 수학 유틸리티 (gamma, beta, incomplete gamma)
 │   ├── export/
 │   │   ├── summaryGenerator.js   # Executive Summary HTML
 │   │   └── pdfExporter.js        # HTML → PDF 변환
 │   ├── main.js                   # 앱 진입점
 │   └── style.css                 # Tailwind CSS + 커스텀 디자인 시스템
 ├── analysis/
-│   ├── cohort_eda.ipynb          # Python EDA 노트북 (36셀, 실행 결과 포함)
+│   ├── cohort_eda.ipynb          # Python EDA 노트북 (실행 결과 포함)
 │   ├── sql_queries.md            # PostgreSQL 쿼리 6종
 │   ├── schema.sql                # 테이블 DDL + 샘플 데이터
 │   └── requirements.txt          # Python 의존성
 ├── public/
 │   └── sample_cohort_data.csv    # 샘플 데이터 (1,010명, 2,306행, 16코호트)
-├── cohort-iq-video/               # Remotion 소개 영상 프로젝트
-│   ├── src/
-│   │   ├── scenes/                # 5개 씬 컴포넌트 (TSX)
-│   │   ├── CohortIQVideo.tsx      # 메인 컴포지션
-│   │   └── styles.ts              # 공유 색상/타이밍 상수
-│   └── package.json
 ├── index.html
 ├── vite.config.js
 └── package.json
@@ -266,7 +272,9 @@ dataValidator → cohortAnalysis → heatmapRenderer
               → ltvPrediction  → ltvVisualization
               → statisticalTests → statisticsRenderer
               → summaryGenerator → pdfExporter
-              → analysisWorker (Web Worker)
+              → analysisWorker (Web Worker, 4-stage)
+abTestSimulation → abTestRenderer (main thread)
+i18n (ko/en) → all UI modules
 ```
 
 ---
@@ -279,6 +287,7 @@ dataValidator → cohortAnalysis → heatmapRenderer
 | Churn 스코어링 (1,010명) | 3초 | ~15ms |
 | 통계 검정 (Chi², KM, Log-Rank) | 3초 | ~10ms |
 | LTV 예측 (16코호트) | 3초 | ~5ms |
+| A/B 시뮬레이션 (1,000회) | 1초 | <1ms |
 | Summary 생성 | 3초 | ~10ms |
 | PDF 다운로드 | 5초 | ~3초 |
 
