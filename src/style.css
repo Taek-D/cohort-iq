@@ -969,3 +969,136 @@ body {
   color: var(--text-muted);
   border: 1px solid var(--border);
 }
+
+/* ─── A/B Test Panel ─── */
+
+.abtest-controls {
+  margin-bottom: 16px;
+}
+
+.abtest-form {
+  padding: 12px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.abtest-form-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.abtest-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  flex: 1;
+  min-width: 140px;
+}
+
+.abtest-select,
+.abtest-input {
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  background: var(--bg-surface);
+}
+
+.abtest-select:focus,
+.abtest-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+}
+
+.abtest-slider-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.abtest-slider {
+  flex: 1;
+  accent-color: var(--accent);
+  height: 4px;
+}
+
+.abtest-slider-val {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  min-width: 48px;
+  text-align: right;
+}
+
+.abtest-cards-wrap {
+  padding: 12px 16px 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.abtest-result-card {
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.abtest-result-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.abtest-result-value {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.abtest-positive {
+  color: var(--green);
+}
+
+.abtest-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.abtest-table th {
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 2px solid var(--border);
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.abtest-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--bg-elevated);
+  color: var(--text-secondary);
+}
+
+.abtest-table tr:hover td {
+  background: var(--bg-hover);
+}
+
+.text-right {
+  text-align: right;
+}

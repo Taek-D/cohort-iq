@@ -91,6 +91,7 @@ export function createAppLayout() {
         <button class="tab-btn active" data-tab="retention">${t('tabs.retention')}</button>
         <button class="tab-btn" data-tab="churn">${t('tabs.churn')}</button>
         <button class="tab-btn" data-tab="ltv">${t('tabs.ltv')}</button>
+        <button class="tab-btn" data-tab="abtest">${t('tabs.abtest')}</button>
       </div>
 
       <!-- Retention Panel -->
@@ -192,6 +193,78 @@ export function createAppLayout() {
             <h3 class="panel-title">${t('panel.cohortComparison')}</h3>
           </div>
           <div id="ltvTableContainer"></div>
+        </div>
+      </div>
+
+      <!-- A/B Test Panel -->
+      <div class="tab-panel" id="panel-abtest">
+        <div class="panel-card abtest-controls">
+          <div class="panel-header">
+            <h3 class="panel-title">${t('abtest.settings')}</h3>
+          </div>
+          <div class="abtest-form">
+            <div class="abtest-form-row">
+              <label class="abtest-label">
+                ${t('abtest.targetWeek')}
+                <select id="abtestWeekSelect" class="abtest-select"></select>
+              </label>
+              <label class="abtest-label">
+                ${t('abtest.deltaRetention')}
+                <div class="abtest-slider-wrap">
+                  <input type="range" id="abtestDeltaSlider" min="1" max="30" value="10" class="abtest-slider" />
+                  <span id="abtestDeltaValue" class="abtest-slider-val">+10%p</span>
+                </div>
+              </label>
+            </div>
+            <div class="abtest-form-row">
+              <label class="abtest-label">
+                ${t('abtest.alpha')}
+                <input type="number" id="abtestAlpha" value="0.05" min="0.01" max="0.10" step="0.01" class="abtest-input" />
+              </label>
+              <label class="abtest-label">
+                ${t('abtest.power')}
+                <input type="number" id="abtestPower" value="0.80" min="0.50" max="0.99" step="0.01" class="abtest-input" />
+              </label>
+              <label class="abtest-label">
+                ${t('abtest.arpu')}
+                <input type="number" id="abtestArpu" value="9900" min="0" step="100" class="abtest-input" />
+              </label>
+            </div>
+            <button type="button" id="runABTest" class="btn-primary">${t('abtest.run')}</button>
+          </div>
+        </div>
+
+        <div id="abtestResults" class="hidden">
+          <div class="panel-card">
+            <div class="panel-header">
+              <h3 class="panel-title">${t('abtest.retentionCompare')}</h3>
+            </div>
+            <div class="chart-area" style="height: 380px;">
+              <canvas id="abtestRetentionChart"></canvas>
+            </div>
+          </div>
+          <div class="panel-grid">
+            <div class="panel-card">
+              <div class="panel-header">
+                <h3 class="panel-title">${t('abtest.powerCurve')}</h3>
+              </div>
+              <div class="chart-area" style="height: 300px;">
+                <canvas id="abtestPowerChart"></canvas>
+              </div>
+            </div>
+            <div class="panel-card">
+              <div class="panel-header">
+                <h3 class="panel-title">${t('abtest.resultSummary')}</h3>
+              </div>
+              <div id="abtestResultCards" class="abtest-cards-wrap"></div>
+            </div>
+          </div>
+          <div class="panel-card">
+            <div class="panel-header">
+              <h3 class="panel-title">${t('abtest.scenarioComparison')}</h3>
+            </div>
+            <div id="abtestScenarioTable"></div>
+          </div>
         </div>
       </div>
 

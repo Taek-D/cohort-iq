@@ -29,6 +29,13 @@ import {
   renderSurvivalCurve,
   renderStatisticsCards,
 } from './visualization/statisticsRenderer.js';
+import { runABTestSimulation } from './core/abTestSimulation.js';
+import {
+  renderRetentionComparison,
+  renderPowerCurve,
+  renderResultCards,
+  renderScenarioTable,
+} from './visualization/abTestRenderer.js';
 import {
   validateCSVFile,
   formatStatusHTML,
@@ -41,11 +48,12 @@ import { t, setLocale } from './i18n/index.js';
 
 // ─── State ───
 
-let charts = { heatmap: null, trend: null, risk: null, ltvBar: null, ltvTrend: null, survival: null };
-let analysisResults = { cohort: null, churn: null, ltv: null, stats: null };
+let charts = { heatmap: null, trend: null, risk: null, ltvBar: null, ltvTrend: null, survival: null, abtestRetention: null, abtestPower: null };
+let analysisResults = { cohort: null, churn: null, ltv: null, stats: null, abtest: null };
 let churnRendered = false;
 let ltvRendered = false;
 let statsRendered = false;
+let abtestPopulated = false;
 
 // ─── Web Worker ───
 
@@ -101,6 +109,7 @@ window.addEventListener('locale-change', () => {
     churnRendered = false;
     ltvRendered = false;
     statsRendered = false;
+    abtestPopulated = false;
 
     charts.heatmap = renderRetentionHeatmap(
       document.getElementById('heatmapChart'),
@@ -161,6 +170,12 @@ function bindEventListeners() {
     if (lang) setLocale(lang);
   });
 
+  // A/B Test
+  document.getElementById('runABTest').addEventListener('click', runABTestHandler);
+  document.getElementById('abtestDeltaSlider').addEventListener('input', (e) => {
+    document.getElementById('abtestDeltaValue').textContent = `+${e.target.value}%p`;
+  });
+
   // LTV Recalculate
   document.getElementById('recalcLTV').addEventListener('click', () => {
     if (!analysisResults.cohort) return;
@@ -196,6 +211,13 @@ function switchToTab(tabName) {
   if (tabName === 'ltv' && !ltvRendered && analysisResults.ltv) {
     requestAnimationFrame(() => {
       renderLTVVisuals();
+    });
+  }
+
+  if (tabName === 'abtest' && analysisResults.cohort && !abtestPopulated) {
+    requestAnimationFrame(() => {
+      populateWeekSelect();
+      abtestPopulated = true;
     });
   }
 }
@@ -333,9 +355,11 @@ function handleAnalysisSuccess(cohortResult, churnResult, ltvResult, statsResult
     analysisResults.churn = churnResult;
     analysisResults.ltv = ltvResult;
     analysisResults.stats = statsResult || null;
+    analysisResults.abtest = null;
     churnRendered = false;
     ltvRendered = false;
     statsRendered = false;
+    abtestPopulated = false;
 
     // Show results
     const resultsArea = document.getElementById('resultsArea');
@@ -358,6 +382,12 @@ function handleAnalysisSuccess(cohortResult, churnResult, ltvResult, statsResult
     destroyChart(charts.ltvBar);
     destroyChart(charts.ltvTrend);
     destroyChart(charts.survival);
+    destroyChart(charts.abtestRetention);
+    destroyChart(charts.abtestPower);
+
+    // Hide A/B test results from previous run
+    const abtestResultsEl = document.getElementById('abtestResults');
+    if (abtestResultsEl) abtestResultsEl.classList.add('hidden');
 
     // Render retention charts (visible tab)
     charts.heatmap = renderRetentionHeatmap(
@@ -416,6 +446,99 @@ function renderStatsOnChurnTab() {
     container.innerHTML = renderStatisticsCards(stats);
     statsRendered = true;
   }
+}
+
+// ─── A/B Test ───
+
+function getAverageRetentionCurve(retentionMatrix) {
+  const weekMap = new Map();
+  retentionMatrix.forEach((item) => {
+    if (!weekMap.has(item.week)) {
+      weekMap.set(item.week, { sum: 0, count: 0 });
+    }
+    const entry = weekMap.get(item.week);
+    entry.sum += item.retention;
+    entry.count++;
+  });
+  return [...weekMap.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .map(([week, { sum, count }]) => ({
+      week,
+      retention: Math.round((sum / count) * 100) / 100,
+    }));
+}
+
+function populateWeekSelect() {
+  const select = document.getElementById('abtestWeekSelect');
+  if (!select || !analysisResults.cohort) return;
+  const curve = getAverageRetentionCurve(
+    analysisResults.cohort.retentionMatrix
+  );
+  select.innerHTML = curve
+    .filter((p) => p.week > 0)
+    .map(
+      (p) =>
+        `<option value="${p.week}" ${p.week === 2 ? 'selected' : ''}>Week ${p.week} (${p.retention.toFixed(1)}%)</option>`
+    )
+    .join('');
+}
+
+function runABTestHandler() {
+  if (!analysisResults.cohort) return;
+
+  const retentionCurve = getAverageRetentionCurve(
+    analysisResults.cohort.retentionMatrix
+  );
+  const targetWeek = parseInt(
+    document.getElementById('abtestWeekSelect').value
+  );
+  const delta = parseInt(document.getElementById('abtestDeltaSlider').value);
+  const alpha =
+    parseFloat(document.getElementById('abtestAlpha').value) || 0.05;
+  const power =
+    parseFloat(document.getElementById('abtestPower').value) || 0.8;
+  const arpu =
+    parseFloat(document.getElementById('abtestArpu').value) || 1;
+
+  const result = runABTestSimulation({
+    retentionCurve,
+    targetWeek,
+    delta,
+    alpha,
+    power,
+    arpu,
+  });
+
+  if (!result) return;
+
+  analysisResults.abtest = result;
+  renderABTestResults(result);
+}
+
+function renderABTestResults(result) {
+  document.getElementById('abtestResults').classList.remove('hidden');
+
+  destroyChart(charts.abtestRetention);
+  destroyChart(charts.abtestPower);
+
+  charts.abtestRetention = renderRetentionComparison(
+    document.getElementById('abtestRetentionChart'),
+    result.retention
+  );
+
+  charts.abtestPower = renderPowerCurve(
+    document.getElementById('abtestPowerChart'),
+    result.powerAnalysis.powerCurve,
+    result.powerAnalysis.sampleSize
+  );
+
+  document.getElementById('abtestResultCards').innerHTML = renderResultCards(
+    result.powerAnalysis,
+    result.ltvImpact
+  );
+
+  document.getElementById('abtestScenarioTable').innerHTML =
+    renderScenarioTable(result.scenarios);
 }
 
 // ─── Report ───
