@@ -21,7 +21,13 @@ CSV 파일 업로드만으로 코호트 리텐션을 분석하고, 활동 패턴
 
 Remotion(React) 기반으로 제작한 25초 프로덕트 소개 영상입니다.
 
-https://github.com/Taek-D/cohort-iq/raw/master/docs/CohortIQ-Intro.mp4
+<p align="center">
+  <a href="https://github.com/Taek-D/cohort-iq/releases/download/v1.2.0/CohortIQ-Intro.mp4">
+    <img src="docs/video-thumbnail.png" alt="CohortIQ 소개 영상" width="720">
+    <br>
+    <sub>클릭하여 영상 재생 (MP4, 25초)</sub>
+  </a>
+</p>
 
 | 씬 | 시간 | 내용 |
 |----|------|------|
