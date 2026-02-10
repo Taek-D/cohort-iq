@@ -1,0 +1,20 @@
+{
+  "name": "cohort-iq-video",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "studio": "npx remotion studio src/index.ts",
+    "render": "npx remotion render src/index.ts CohortIQIntro out/CohortIQ-Intro.mp4",
+    "render:gif": "npx remotion render src/index.ts CohortIQIntro out/CohortIQ-Intro.gif --image-format png"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.0",
+    "typescript": "^5.5.0"
+  }
+}

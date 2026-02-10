@@ -27,3 +27,6 @@ dist-ssr
 test-results
 playwright-report
 coverage
+
+# Remotion video output
+cohort-iq-video/out/
