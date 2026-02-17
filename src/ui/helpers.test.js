@@ -74,6 +74,12 @@ describe('formatStatusHTML', () => {
     const html = formatStatusHTML('기본');
     expect(html).toContain('status-info');
   });
+
+  it('escapes HTML in message', () => {
+    const html = formatStatusHTML('<img src=x onerror=alert(1)>', 'error');
+    expect(html).toContain('&lt;img');
+    expect(html).not.toContain('<img');
+  });
 });
 
 // ─── formatValidationErrorsHTML ───
@@ -107,6 +113,12 @@ describe('formatValidationErrorsHTML', () => {
   it('shows status-error class', () => {
     const html = formatValidationErrorsHTML(['에러']);
     expect(html).toContain('status-error');
+  });
+
+  it('escapes HTML in error items', () => {
+    const html = formatValidationErrorsHTML(['<script>alert(1)</script>']);
+    expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
+    expect(html).not.toContain('<script>');
   });
 });
 

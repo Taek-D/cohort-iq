@@ -63,4 +63,19 @@ describe('Cohort Analysis', () => {
         expect(result.retentionMatrix[0].total).toBe(1);
         expect(result.retentionMatrix[0].users).toBe(1);
     });
+
+    it('should count week-1 retention correctly with local-midnight dates', () => {
+        const tzData = [
+            { user_id: 'u1', signup_date: new Date(2025, 0, 6), event_date: new Date(2025, 0, 6) }, // 2025-01-06
+            { user_id: 'u1', signup_date: new Date(2025, 0, 6), event_date: new Date(2025, 0, 13) }, // +1 week
+            { user_id: 'u2', signup_date: new Date(2025, 0, 7), event_date: new Date(2025, 0, 7) },
+        ];
+
+        const result = analyzeCohort(tzData);
+        const week1 = result.retentionMatrix.find((r) => r.week === 1);
+
+        expect(week1).toBeDefined();
+        expect(week1.users).toBe(1);
+        expect(week1.retention).toBe(50);
+    });
 });

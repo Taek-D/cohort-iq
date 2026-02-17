@@ -1,5 +1,5 @@
 // cohortAnalysis.js - 코호트 리텐션 분석 엔진
-import { format, differenceInWeeks, startOfWeek } from 'date-fns';
+import { format, differenceInWeeks, startOfWeek, parseISO } from 'date-fns';
 
 /**
  * 코호트 그룹화 (주 단위)
@@ -45,7 +45,8 @@ export function calculateRetention(validatedData, cohortInfo) {
 
     // 각 코호트별 리텐션 계산
     cohorts.forEach((users, cohortKey) => {
-        const cohortDate = new Date(cohortKey);
+        // Avoid UTC parsing drift from `new Date('yyyy-MM-dd')` in some timezones.
+        const cohortDate = parseISO(cohortKey);
         const weeklyRetention = new Map(); // Week N -> Set<user_id>
 
         // Week 0 초기화 (가입 주 — 코호트 전원 활성)

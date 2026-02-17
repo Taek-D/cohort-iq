@@ -103,6 +103,9 @@ export default {
   'status.noAnalysisResult': 'No analysis results available.',
   'status.reportError': 'Report generation error: {{message}}',
   'status.generating': 'Generating...',
+  'status.abtestInvalidWeek': 'No valid target week available for A/B test.',
+  'status.abtestInvalidParams':
+    'Invalid A/B test parameters. Please review the inputs.',
 
   // Validation messages
   'validation.emptyData': 'Data is empty.',
@@ -249,6 +252,7 @@ export default {
   'abtest.noData':
     'Analyze CSV data first before running A/B test simulation.',
   'abtest.weekLabel': 'Week {{week}}',
+  'abtest.noWeekData': 'No week data available',
 
   // PDF modal
   'pdf.preview': 'PDF Preview',

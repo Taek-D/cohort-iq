@@ -180,6 +180,9 @@ export function simulateRetention(params) {
   const { retentionCurve, targetWeek, delta, decayRate = 0.5 } = params;
 
   if (!retentionCurve || retentionCurve.length === 0) return [];
+  if (!Number.isFinite(targetWeek) || !Number.isFinite(delta)) {
+    return retentionCurve.map((point) => ({ ...point }));
+  }
 
   return retentionCurve.map((point) => {
     if (point.week < targetWeek) {
@@ -246,20 +249,40 @@ export function runABTestSimulation(params) {
     return null;
   }
 
+  const targetWeekNum = Number(targetWeek);
+  const deltaNum = Number(delta);
+  const alphaNum = Number(alpha);
+  const powerNum = Number(power);
+  const arpuNum = Number(arpu);
+  const decayRateNum = Number(decayRate);
+
+  if (
+    !Number.isFinite(targetWeekNum) ||
+    !Number.isFinite(deltaNum) ||
+    deltaNum <= 0 ||
+    !Number.isFinite(alphaNum) ||
+    !Number.isFinite(powerNum) ||
+    !Number.isFinite(arpuNum) ||
+    !Number.isFinite(decayRateNum)
+  ) {
+    return null;
+  }
+
   // Find baseline rate at target week
-  const targetPoint = retentionCurve.find((p) => p.week === targetWeek);
-  const baselineRate = targetPoint ? targetPoint.retention / 100 : 0.5;
-  const mde = delta / 100;
+  const targetPoint = retentionCurve.find((p) => p.week === targetWeekNum);
+  const fallbackPoint = retentionCurve[retentionCurve.length - 1];
+  const baselineRate = (targetPoint ?? fallbackPoint).retention / 100;
+  const mde = deltaNum / 100;
 
   // Power Analysis
   const sampleResult = requiredSampleSize({
     baselineRate,
     mde,
-    alpha,
-    power,
+    alpha: alphaNum,
+    power: powerNum,
   });
 
-  const powerCurve = generatePowerCurve(baselineRate, mde, alpha);
+  const powerCurve = generatePowerCurve(baselineRate, mde, alphaNum);
 
   const powerAnalysis = {
     sampleSize: sampleResult.sampleSize,
@@ -267,8 +290,8 @@ export function runABTestSimulation(params) {
     mde,
     baselineRate,
     treatmentRate: sampleResult.treatmentRate,
-    alpha,
-    power,
+    alpha: alphaNum,
+    power: powerNum,
     powerCurve,
   };
 
@@ -276,16 +299,16 @@ export function runABTestSimulation(params) {
   const control = retentionCurve.map((p) => ({ ...p }));
   const treatment = simulateRetention({
     retentionCurve,
-    targetWeek,
-    delta,
-    decayRate,
+    targetWeek: targetWeekNum,
+    delta: deltaNum,
+    decayRate: decayRateNum,
   });
 
-  const retention = { control, treatment, targetWeek, delta };
+  const retention = { control, treatment, targetWeek: targetWeekNum, delta: deltaNum };
 
   // LTV Impact
-  const controlLTV = calculateCohortLTV(control, arpu).projectedLTV;
-  const treatmentLTV = calculateCohortLTV(treatment, arpu).projectedLTV;
+  const controlLTV = calculateCohortLTV(control, arpuNum).projectedLTV;
+  const treatmentLTV = calculateCohortLTV(treatment, arpuNum).projectedLTV;
   const ltvDelta = Math.round((treatmentLTV - controlLTV) * 100) / 100;
   const ltvDeltaPct =
     controlLTV > 0
@@ -311,21 +334,21 @@ export function runABTestSimulation(params) {
   ];
 
   const scenarios = scenarioFactors.map((sf) => {
-    const sDelta = delta * sf.factor;
+    const sDelta = deltaNum * sf.factor;
     const sMde = sDelta / 100;
     const sSample = requiredSampleSize({
       baselineRate,
       mde: sMde,
-      alpha,
-      power,
+      alpha: alphaNum,
+      power: powerNum,
     });
     const sTreatment = simulateRetention({
       retentionCurve,
-      targetWeek,
+      targetWeek: targetWeekNum,
       delta: sDelta,
-      decayRate,
+      decayRate: decayRateNum,
     });
-    const sLTV = calculateCohortLTV(sTreatment, arpu).projectedLTV;
+    const sLTV = calculateCohortLTV(sTreatment, arpuNum).projectedLTV;
     const sLtvDelta = Math.round((sLTV - controlLTV) * 100) / 100;
 
     return {

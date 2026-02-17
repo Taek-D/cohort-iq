@@ -6,9 +6,23 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['papaparse', 'chart.js', 'date-fns'],
-          export: ['jspdf', 'html2canvas-pro'],
+        manualChunks(id) {
+          if (id.includes('node_modules/jspdf')) {
+            return 'jspdf';
+          }
+
+          if (id.includes('node_modules/html2canvas-pro')) {
+            return 'html2canvas';
+          }
+
+          if (
+            id.includes('node_modules/papaparse') ||
+            id.includes('node_modules/chart.js') ||
+            id.includes('node_modules/chartjs-chart-matrix') ||
+            id.includes('node_modules/date-fns')
+          ) {
+            return 'vendor';
+          }
         },
       },
     },

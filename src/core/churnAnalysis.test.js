@@ -71,4 +71,22 @@ describe('Churn Analysis', () => {
         expect(['LOW', 'MEDIUM']).toContain(user.riskLevel);
         expect(user.riskScore).toBeLessThan(50);
     });
+
+    it('should calculate trailing consecutive inactive weeks from current date', () => {
+        const cohortInfo = {
+            userCohortMap: new Map([
+                ['u1', { cohort: '2025-01-06', signup_date: new Date('2025-01-06') }],
+            ]),
+        };
+        const data = [
+            { user_id: 'u1', signup_date: new Date('2025-01-06'), event_date: new Date('2025-01-06') },
+            { user_id: 'u1', signup_date: new Date('2025-01-06'), event_date: new Date('2025-01-13') },
+        ];
+
+        const activity = analyzeUserActivity(data, cohortInfo);
+        const risk = calculateChurnRisk(activity, new Date('2025-02-12'));
+
+        expect(risk).toHaveLength(1);
+        expect(risk[0].metrics.consecutiveInactiveWeeks).toBe(4);
+    });
 });

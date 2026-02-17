@@ -208,4 +208,13 @@ describe('runABTestSimulation', () => {
     );
     expect(result.ltvImpact.ltvDelta).toBeGreaterThan(0);
   });
+
+  it('returns null for invalid target week', () => {
+    const result = runABTestSimulation({
+      retentionCurve: curve,
+      targetWeek: Number.NaN,
+      delta: 10,
+    });
+    expect(result).toBeNull();
+  });
 });

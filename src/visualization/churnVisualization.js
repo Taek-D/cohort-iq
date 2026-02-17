@@ -2,6 +2,15 @@
 import { Chart } from 'chart.js/auto';
 import { t } from '../i18n/index.js';
 
+function escapeHTML(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
 const tooltip = {
   backgroundColor: '#111827',
   titleColor: '#f9fafb',
@@ -116,15 +125,18 @@ export function renderRiskUsersTable(churnRiskData, limit = 20) {
   const rows = topRiskUsers
     .map((user, index) => {
       const badge = getRiskBadge(user.riskLevel);
+      const safeUserId = escapeHTML(user.userId);
+      const safeCohort = escapeHTML(user.cohort);
+      const safeRiskLevel = escapeHTML(user.riskLevel);
       return `
       <tr>
         <td style="font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); text-align: right;">${index + 1}</td>
-        <td style="font-weight: 500; color: var(--text-primary);">${user.userId}</td>
-        <td style="font-family: var(--font-mono); font-size: 12px;">${user.cohort}</td>
+        <td style="font-weight: 500; color: var(--text-primary);">${safeUserId}</td>
+        <td style="font-family: var(--font-mono); font-size: 12px;">${safeCohort}</td>
         <td>
           <span class="risk-badge" style="background: ${badge.bg}; color: ${badge.color};">
             <span class="dot" style="background: ${badge.color};"></span>
-            ${user.riskLevel}
+            ${safeRiskLevel}
           </span>
         </td>
         <td style="font-family: var(--font-mono); font-size: 12px; text-align: right; font-weight: 600; color: ${badge.color};">${user.riskScore}</td>
@@ -164,22 +176,26 @@ export function renderInsightsCards(insights) {
   const cards = insights
     .map((insight) => {
       const severity = getSeverityStyle(insight.severity);
+      const safeTitle = escapeHTML(insight.title);
+      const safeDescription = escapeHTML(insight.description);
+      const safeAction = escapeHTML(insight.action);
+      const safeAffectedUsers = escapeHTML(insight.affectedUsers);
 
       return `
       <div class="insight-card" style="border-left: 2px solid ${severity.borderColor};">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2px;">
           <h4 style="font-size: 13px; font-weight: 600; color: ${severity.textColor}; margin: 0;">
-            ${insight.title}
+            ${safeTitle}
           </h4>
           <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); white-space: nowrap; margin-left: 12px;">
-            ${insight.affectedUsers} ${t('insight.users')}
+            ${safeAffectedUsers} ${t('insight.users')}
           </span>
         </div>
         <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5; margin: 4px 0 6px;">
-          ${insight.description}
+          ${safeDescription}
         </p>
         <p style="font-size: 12px; color: var(--text-label); margin: 0;">
-          &rarr; ${insight.action}
+          &rarr; ${safeAction}
         </p>
       </div>
     `;

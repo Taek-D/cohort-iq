@@ -106,6 +106,10 @@ export default {
   'status.noAnalysisResult': '\ubd84\uc11d \uacb0\uacfc\uac00 \uc5c6\uc2b5\ub2c8\ub2e4.',
   'status.reportError': '\ub9ac\ud3ec\ud2b8 \uc0dd\uc131 \uc624\ub958: {{message}}',
   'status.generating': '\uc0dd\uc131 \uc911...',
+  'status.abtestInvalidWeek':
+    'A/B \ud14c\uc2a4\ud2b8\uc5d0 \uc0ac\uc6a9\ud560 \uc720\ud6a8\ud55c \ud0c0\uac9f \uc8fc\ucc28\uac00 \uc5c6\uc2b5\ub2c8\ub2e4.',
+  'status.abtestInvalidParams':
+    'A/B \ud14c\uc2a4\ud2b8 \uc785\ub825\uac12\uc774 \uc720\ud6a8\ud558\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.',
 
   // Validation messages
   'validation.emptyData': '\ub370\uc774\ud130\uac00 \ube44\uc5b4\uc788\uc2b5\ub2c8\ub2e4.',
@@ -259,6 +263,7 @@ export default {
   'abtest.noData':
     '먼저 CSV 데이터를 분석한 후 A/B 테스트를 실행하세요.',
   'abtest.weekLabel': 'Week {{week}}',
+  'abtest.noWeekData': '\uc0ac\uc6a9 \uac00\ub2a5\ud55c \uc8fc\ucc28 \ub370\uc774\ud130 \uc5c6\uc74c',
 
   // PDF modal
   'pdf.preview': 'PDF 미리보기',

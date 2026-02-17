@@ -44,7 +44,7 @@ import {
   extractDisplayStats,
 } from './ui/helpers.js';
 import { createAppLayout } from './ui/appLayout.js';
-import { t, setLocale } from './i18n/index.js';
+import { t, setLocale, getLocale } from './i18n/index.js';
 
 // ─── State ───
 
@@ -61,6 +61,15 @@ const analysisWorker = new Worker(
   new URL('./core/analysisWorker.js', import.meta.url),
   { type: 'module' }
 );
+
+function syncWorkerLocale() {
+  analysisWorker.postMessage({
+    type: 'SET_LOCALE',
+    data: { locale: getLocale() },
+  });
+}
+
+syncWorkerLocale();
 
 analysisWorker.onmessage = (e) => {
   const { type, payload, error } = e.data;
@@ -93,6 +102,7 @@ window.onerror = function (message) {
 // ─── Locale Change ───
 
 window.addEventListener('locale-change', () => {
+  syncWorkerLocale();
   const hadResults = !document.getElementById('resultsArea')?.classList.contains('hidden');
   initUI();
 
@@ -346,7 +356,10 @@ function processCSV(csvText) {
 
 function analyzeAndVisualize(validatedData) {
   showStatus(t('status.analyzing'), 'loading');
-  analysisWorker.postMessage({ type: 'ANALYZE', data: validatedData });
+  analysisWorker.postMessage({
+    type: 'ANALYZE',
+    data: { rows: validatedData, locale: getLocale() },
+  });
 }
 
 function handleAnalysisSuccess(cohortResult, churnResult, ltvResult, statsResult) {
@@ -471,14 +484,27 @@ function getAverageRetentionCurve(retentionMatrix) {
 function populateWeekSelect() {
   const select = document.getElementById('abtestWeekSelect');
   if (!select || !analysisResults.cohort) return;
+  const runBtn = document.getElementById('runABTest');
   const curve = getAverageRetentionCurve(
     analysisResults.cohort.retentionMatrix
   );
-  select.innerHTML = curve
-    .filter((p) => p.week > 0)
+  const weekOptions = curve.filter((p) => p.week > 0);
+
+  if (weekOptions.length === 0) {
+    select.innerHTML = `<option value="" selected>${t('abtest.noWeekData')}</option>`;
+    select.disabled = true;
+    if (runBtn) runBtn.disabled = true;
+    return;
+  }
+
+  const defaultWeek =
+    weekOptions.find((p) => p.week === 2)?.week ?? weekOptions[0].week;
+  select.disabled = false;
+  if (runBtn) runBtn.disabled = false;
+  select.innerHTML = weekOptions
     .map(
       (p) =>
-        `<option value="${p.week}" ${p.week === 2 ? 'selected' : ''}>Week ${p.week} (${p.retention.toFixed(1)}%)</option>`
+        `<option value="${p.week}" ${p.week === defaultWeek ? 'selected' : ''}>Week ${p.week} (${p.retention.toFixed(1)}%)</option>`
     )
     .join('');
 }
@@ -489,16 +515,36 @@ function runABTestHandler() {
   const retentionCurve = getAverageRetentionCurve(
     analysisResults.cohort.retentionMatrix
   );
-  const targetWeek = parseInt(
-    document.getElementById('abtestWeekSelect').value
+  const targetWeek = Number.parseInt(
+    document.getElementById('abtestWeekSelect').value,
+    10
   );
-  const delta = parseInt(document.getElementById('abtestDeltaSlider').value);
+  const delta = Number.parseInt(
+    document.getElementById('abtestDeltaSlider').value,
+    10
+  );
   const alpha =
     parseFloat(document.getElementById('abtestAlpha').value) || 0.05;
   const power =
     parseFloat(document.getElementById('abtestPower').value) || 0.8;
   const arpu =
     parseFloat(document.getElementById('abtestArpu').value) || 1;
+
+  if (!Number.isFinite(targetWeek)) {
+    showStatus(t('status.abtestInvalidWeek'), 'error');
+    return;
+  }
+
+  if (
+    !Number.isFinite(delta) ||
+    delta <= 0 ||
+    !Number.isFinite(alpha) ||
+    !Number.isFinite(power) ||
+    !Number.isFinite(arpu)
+  ) {
+    showStatus(t('status.abtestInvalidParams'), 'error');
+    return;
+  }
 
   const result = runABTestSimulation({
     retentionCurve,
@@ -509,7 +555,10 @@ function runABTestHandler() {
     arpu,
   });
 
-  if (!result) return;
+  if (!result) {
+    showStatus(t('status.abtestInvalidParams'), 'error');
+    return;
+  }
 
   analysisResults.abtest = result;
   renderABTestResults(result);

@@ -115,18 +115,10 @@ export function calculateChurnRisk(userActivity, currentDate = new Date()) {
             activityDensity = Math.min(100, Math.max(0, (totalActiveWeeks / weeksSinceSignup) * 100));
         }
 
-        // 5. 연속 미활동 주차 계산
-        let consecutiveInactiveWeeks = 0;
+        // 5. 연속 미활동 주차 계산 (현재 시점 기준 trailing inactivity)
         const sortedWeeks = Array.from(activity.activeWeeks).sort((a, b) => a - b);
-        const maxWeek = Math.max(...sortedWeeks, 0);
-
-        for (let week = maxWeek; week >= 0; week--) {
-            if (!activity.activeWeeks.has(week)) {
-                consecutiveInactiveWeeks++;
-            } else {
-                break;
-            }
-        }
+        const lastActiveWeek = Math.max(...sortedWeeks, 0);
+        const consecutiveInactiveWeeks = Math.max(0, weeksSinceSignup - lastActiveWeek);
 
         // 6. Churn 위험 스코어 계산 (0-100)
         let riskScore = 0;
