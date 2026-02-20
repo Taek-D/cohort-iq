@@ -1,0 +1,6 @@
+node_modules/
+dist/
+docs/archive/
+*.ipynb
+.jupyter/
+package-lock.json

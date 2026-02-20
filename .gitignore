@@ -28,5 +28,8 @@ test-results
 playwright-report
 coverage
 
+# Claude Code machine-specific settings
+.claude/settings.local.json
+
 # Remotion video output
 cohort-iq-video/out/

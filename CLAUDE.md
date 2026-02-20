@@ -29,24 +29,9 @@ i18n (ko/en) → all UI modules
 - Build: `npm run build` | Dev: `npm run dev` | Test: `npm run test`
 - 102 tests across 8 files — all passing
 
-## Coding Conventions
+## Rules
 
-- Vanilla JavaScript (ES6+), no framework
-- ES Modules (`import`/`export`)
-- Functional programming preferred (pure functions, immutability)
-- Dates: always `date-fns` | CSV: always `PapaParse` | Charts: `chart.js/auto`
-- Chart.js import: `chart.js/auto` (not `chart.js`)
-- Canvas: pass element (not 2d context) to Chart.js
-- html2canvas: use `html2canvas-pro` (oklch support for Tailwind v4)
-- i18n default locale: `ko` (for test compatibility)
-
-## Forbidden
-
-- `var` keyword — use `const`/`let`
-- `console.log` in commits
-- External API calls (pure client-side only)
-- Direct `node_modules` modification
-- Synchronous FileReader
+Coding conventions, chart/canvas patterns, testing, and i18n rules are in `.claude/rules/`.
 
 ## CSV Data Format
 
